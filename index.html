@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-<title>Opera</title>
+<title>Search</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><ellipse cx='16' cy='16' rx='14' ry='14' fill='%23FF1B2D'/><ellipse cx='16' cy='16' rx='7' ry='11' fill='none' stroke='white' stroke-width='3'/></svg>"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
@@ -259,25 +259,19 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
           placeholder="Search or enter address"
           onkeydown="handleAddr(event)"
           onfocus="this.select()"/>
-        <span class="addr-badge badge-vpn">VPN</span>
-        <span class="addr-badge badge-ad" id="ad-badge">Ad Block</span>
+        
+        
         <button id="mic-btn" title="Voice search" onclick="toggleMic()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
         </button>
       </div>
 
       <div class="toolbar-right">
-        <button class="tool-btn" title="Bookmarks" onclick="showToast('Bookmarks')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-        </button>
-        <button class="tool-btn" title="Downloads" onclick="togglePanel('downloads-panel')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        </button>
-        <button class="tool-btn" title="Extensions" onclick="togglePanel('extensions-panel')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-        </button>
         <button class="tool-btn" title="Zoom" onclick="cycleZoom()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        </button>
+        <button class="tool-btn" title="Games" onclick="openExternal('https://faiz1152.github.io/Games')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><circle cx="16" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="18.5" cy="13.5" r="1" fill="currentColor" stroke="none"/><rect x="2" y="7" width="20" height="10" rx="5"/></svg>
         </button>
         <button class="tool-btn" id="menu-btn" title="Menu" onclick="togglePanel('settings-panel')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
@@ -292,8 +286,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 
     <!-- Sidebar -->
     <div id="sidebar">
-      <!-- Opera Logo -->
-      <div style="width:38px;height:38px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="goHome()" title="Opera">
+      <!-- Search Logo -->
+      <div style="width:38px;height:38px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;" onclick="goHome()" title="Search">
         <svg viewBox="0 0 24 24" width="22" height="22"><ellipse cx="12" cy="12" rx="10" ry="10" fill="none" stroke="white" stroke-width="2"/><ellipse cx="12" cy="12" rx="4.5" ry="7" fill="none" stroke="white" stroke-width="2"/></svg>
       </div>
 
@@ -330,18 +324,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         <span class="sb-label">Flow</span>
       </button>
-      <button class="sb-icon" title="Pinboards" onclick="showToast('Pinboards')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        <span class="sb-label">Pin</span>
-      </button>
-
       <div class="sb-spacer"></div>
 
       <button class="sb-icon" title="Settings" onclick="togglePanel('settings-panel')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span class="sb-label">Set</span>
       </button>
-      <div class="sb-avatar" title="My Account" onclick="showToast('My Opera Account')">O</div>
     </div>
 
     <!-- Side Panel -->
@@ -387,7 +375,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
             </div>
             <div class="home-search-btns" style="display:flex;justify-content:center;gap:8px;margin-top:12px;">
               <button class="home-search-btn" onclick="doSearch(document.getElementById('home-search-input').value||'Google Search')">Google Search</button>
-              <button class="home-search-btn" onclick="doSearch(document.getElementById('home-search-input').value||'',true)">I\'m Feeling Lucky</button>
+              <button class="home-search-btn" onclick="doSearch(document.getElementById('home-search-input').value||'',true)">I'm Feeling Lucky</button>
             </div>
           </div>
 
@@ -432,8 +420,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
               </div>
             </div>
 
-            <div class="sd-label">Opera News</div>
-            <div class="news-grid" id="news-grid"></div>
+            
+            
           </div>
         </div>
 
@@ -457,12 +445,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 
       <!-- Status bar -->
       <div id="status-bar">
-        <span id="status-text">✓ Opera secure browser</span>
+        
         <span style="flex:1;"></span>
-        <span id="ad-count">🛡 0 ads blocked</span>
-        <span>|</span>
-        <span id="zoom-label">100%</span>
-        <span>|</span>
+        
+        
+        
+        
         <span id="battery-label">🔋 Battery Saver</span>
       </div>
     </div>
@@ -501,7 +489,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div style="display:flex;flex-direction:column;gap:8px;">
     <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);">
       <span style="font-size:20px;">🛡️</span>
-      <div style="flex:1;"><div style="font-size:12px;font-weight:500;">Opera Ad Blocker</div><div style="font-size:10px;color:var(--text3);">Built-in</div></div>
+      <div style="flex:1;"><div style="font-size:12px;font-weight:500;">Search Ad Blocker</div><div style="font-size:10px;color:var(--text3);">Built-in</div></div>
       <button class="toggle on" onclick="this.classList.toggle('on')"></button>
     </div>
     <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);">
@@ -545,7 +533,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
   <div style="height:1px;background:var(--border);margin:4px 8px;"></div>
   <div class="set-row" onclick="showAbout()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    About Opera
+    About Search
   </div>
 </div>
 
@@ -620,7 +608,7 @@ const newsItems = [
 function renderNews() {
   const grid = document.getElementById('news-grid');
   grid.innerHTML = newsItems.map(n => `
-    <div class="news-card" onclick="navigate('https://www.google.com/search?q=${encodeURIComponent(n.title)}','${n.title}')" oncontextmenu="showCtxLink(event,'https://www.google.com/search?q=${encodeURIComponent(n.title)}','${n.title}')">
+    <div class="news-card" onclick="navigate('https://search.brave.com/search?q=${encodeURIComponent(n.title)}','${n.title}')" oncontextmenu="showCtxLink(event,'https://search.brave.com/search?q=${encodeURIComponent(n.title)}','${n.title}')">
       <div class="news-thumb">${n.emoji}</div>
       <div class="news-body">
         <div class="news-source">${n.source}</div>
@@ -674,7 +662,7 @@ function showHome() {
   document.getElementById('home-page').style.display = 'flex';
   document.getElementById('nav-page').classList.remove('visible');
   document.getElementById('addr-input').value = 'google.com';
-  document.getElementById('status-text').textContent = '✓ Opera secure browser';
+  document.getElementById('status-text').textContent = '✓ Search secure browser';
 }
 
 function showNavPage(url, title) {
@@ -704,7 +692,7 @@ function handleAddr(e) {
     let v = e.target.value.trim();
     if (!v) return;
     if (!v.startsWith('http') && !v.includes('.') || v.includes(' ')) {
-      navigate('https://www.google.com/search?q=' + encodeURIComponent(v), 'Google: ' + v);
+      navigate('https://search.brave.com/search?q=' + encodeURIComponent(v), 'Google: ' + v);
     } else {
       navigate(v.startsWith('http') ? v : 'https://' + v, v);
     }
@@ -722,8 +710,8 @@ function handleHomeSearch(e) {
 function doSearch(q, lucky) {
   if (!q || !q.trim()) return;
   const url = lucky
-    ? 'https://www.google.com/search?q=' + encodeURIComponent(q) + '&btnI=1'
-    : 'https://www.google.com/search?q=' + encodeURIComponent(q);
+    ? 'https://search.brave.com/search?q=' + encodeURIComponent(q)
+    : 'https://search.brave.com/search?q=' + encodeURIComponent(q);
   navigate(url, 'Google: ' + q);
 }
 
@@ -865,7 +853,7 @@ function toggleSidePanel(type) {
   currentSidePanel = type;
   panel.classList.add('show');
   document.getElementById('sp-title').textContent = {
-    news: 'Opera News', music: 'Music Player', flow: 'My Flow'
+    news: 'Search News', music: 'Music Player', flow: 'My Flow'
   }[type] || type;
   renderSidePanelContent(type);
 }
@@ -879,7 +867,7 @@ function renderSidePanelContent(type) {
   const c = document.getElementById('sp-content');
   if (type === 'news') {
     c.innerHTML = newsItems.map(n => `
-      <div style="padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="navigate('https://www.google.com/search?q=${encodeURIComponent(n.title)}','${n.title}')">
+      <div style="padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="navigate('https://search.brave.com/search?q=${encodeURIComponent(n.title)}','${n.title}')">
         <div style="font-size:10px;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px;">${n.source} · ${n.time}</div>
         <div style="font-size:12px;color:var(--text);line-height:1.4;">${n.emoji} ${n.title}</div>
       </div>`).join('');
@@ -1027,10 +1015,27 @@ function showToast(msg) {
 
 function openExternal(url) { window.open(url, '_blank', 'noopener'); }
 
-function addSpeedDial() {
-  const url = prompt('Enter URL:');
-  if (!url) return;
-  const name = prompt('Name:') || url;
+// ── Custom Speed Dial persistence (cookies) ──
+let customDials = [];
+const DIAL_COOKIE = 'operaCustomDials';
+
+function saveDialsCookie() {
+  const value = encodeURIComponent(JSON.stringify(customDials));
+  const maxAge = 60 * 60 * 24 * 365; // 1 year
+  document.cookie = `${DIAL_COOKIE}=${value}; max-age=${maxAge}; path=/`;
+}
+
+function loadDialsCookie() {
+  const match = document.cookie.split('; ').find(row => row.startsWith(DIAL_COOKIE + '='));
+  if (!match) return [];
+  try {
+    return JSON.parse(decodeURIComponent(match.split('=')[1])) || [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function renderDialItem(url, name) {
   const grid = document.getElementById('speed-dial-grid');
   const addBtn = grid.querySelector('.sd-add');
   const item = document.createElement('a');
@@ -1040,7 +1045,21 @@ function addSpeedDial() {
   item.oncontextmenu = (e) => showCtxLink(e, url.startsWith('http') ? url : 'https://' + url, name);
   item.innerHTML = `<div class="sd-icon" style="background:var(--surface2);font-size:18px;">🔗</div><span class="sd-name">${name}</span>`;
   grid.insertBefore(item, addBtn);
+}
+
+function addSpeedDial() {
+  const url = prompt('Enter URL:');
+  if (!url) return;
+  const name = prompt('Name:') || url;
+  renderDialItem(url, name);
+  customDials.push({ url, name });
+  saveDialsCookie();
   showToast(`Added ${name} to Speed Dial`);
+}
+
+function restoreDialsFromCookie() {
+  customDials = loadDialsCookie();
+  customDials.forEach(d => renderDialItem(d.url, d.name));
 }
 
 function saveAsFile() {
@@ -1069,7 +1088,7 @@ function openLocalFile(input) {
 function shareLink() {
   const url = window.location.href;
   if (navigator.share) {
-    navigator.share({ title: 'Opera', url }).catch(() => {});
+    navigator.share({ title: 'Search', url }).catch(() => {});
   } else {
     navigator.clipboard.writeText(url).then(() => showToast('Link copied to clipboard!'));
   }
@@ -1087,7 +1106,7 @@ function viewSource() { window.open('view-source:' + window.location.href, '_bla
 
 function showAbout() {
   closeAllPanels();
-  showToast('Opera Browser · Version 106.0 · Built with ❤️');
+  showToast('Search Browser · Version 106.0 · Built with ❤️');
 }
 
 // ── Battery API ──
@@ -1104,8 +1123,11 @@ if (navigator.getBattery) {
   }).catch(() => {});
 }
 
+// ── Restore saved Speed Dial shortcuts from cookies ──
+restoreDialsFromCookie();
+
 // ── Keyboard shortcuts display ──
-showToast('Welcome to Opera');
+showToast('Welcome to Search');
 </script>
 </body>
 </html>
