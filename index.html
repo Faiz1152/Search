@@ -5,253 +5,454 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="light dark">
 <title>Search</title>
+
 <style>
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #ffffff;
+  --text: #202124;
+  --muted: #5f6368;
+  --border: #dadce0;
+  --card: #ffffff;
+  --hover: #f8f9fa;
+  --accent: #1a73e8;
+  --shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+@media (prefers-color-scheme: dark) {
   :root {
-    color-scheme: light;
-    --bg:#ffffff;
-    --surface:#ffffff;
-    --surface-2:#f6f7f9;
-    --text:#202124;
-    --muted:#5f6368;
-    --border:#dadce0;
-    --accent:#1a73e8;
-    --shadow:0 1px 3px rgba(0,0,0,.08),0 6px 24px rgba(0,0,0,.06);
+    --bg: #202124;
+    --text: #e8eaed;
+    --muted: #9aa0a6;
+    --border: #3c4043;
+    --card: #292a2d;
+    --hover: #303134;
+    --accent: #8ab4f8;
+    --shadow: 0 2px 8px rgba(0,0,0,.25);
   }
-  :root[data-theme="dark"] {
-    color-scheme: dark;
-    --bg:#111315;
-    --surface:#17191c;
-    --surface-2:#202328;
-    --text:#e8eaed;
-    --muted:#aeb4bc;
-    --border:#34383f;
-    --accent:#8ab4f8;
-    --shadow:0 2px 8px rgba(0,0,0,.3);
-  }
-  * { box-sizing:border-box; }
-  html,body { margin:0; min-height:100%; background:var(--bg); color:var(--text); font-family:Arial,Helvetica,sans-serif; }
-  button,input { font:inherit; }
-  body { min-height:100vh; }
-  .page { min-height:100vh; display:flex; flex-direction:column; }
-  header { display:flex; justify-content:flex-end; align-items:center; padding:14px 20px; gap:10px; }
-  .theme-wrap { position:relative; }
-  .icon-btn {
-    width:42px; height:42px; border:1px solid transparent; border-radius:50%;
-    background:transparent; color:var(--text); cursor:pointer; font-size:20px;
-  }
-  .icon-btn:hover,.icon-btn:focus-visible { background:var(--surface-2); outline:none; }
-  .theme-menu {
-    position:absolute; right:0; top:48px; z-index:20; width:150px; padding:6px;
-    background:var(--surface); border:1px solid var(--border); border-radius:12px;
-    box-shadow:var(--shadow); display:none;
-  }
-  .theme-menu.open { display:block; }
-  .theme-option {
-    width:100%; border:0; background:transparent; color:var(--text);
-    text-align:left; padding:10px 12px; border-radius:8px; cursor:pointer;
-  }
-  .theme-option:hover { background:var(--surface-2); }
-  .theme-option.active { background:var(--surface-2); font-weight:700; }
+}
 
-  main { width:min(100%,980px); margin:auto; padding:7vh 20px 50px; }
-  .hero { display:flex; flex-direction:column; align-items:center; margin-bottom:38px; }
-  .logo { font-size:64px; line-height:1; margin-bottom:26px; user-select:none; }
-  .search-form { width:min(100%,720px); position:relative; }
-  .search-box {
-    width:100%; height:56px; border:1px solid var(--border); border-radius:30px;
-    background:var(--surface); color:var(--text); padding:0 58px 0 52px;
-    outline:none; box-shadow:0 1px 3px rgba(0,0,0,.08);
-  }
-  .search-box:hover,.search-box:focus { box-shadow:0 2px 8px rgba(0,0,0,.13); border-color:transparent; }
-  .search-icon { position:absolute; left:19px; top:17px; font-size:20px; color:var(--muted); pointer-events:none; }
-  .submit-btn {
-    position:absolute; right:7px; top:7px; width:42px; height:42px; border:0;
-    border-radius:50%; background:var(--accent); color:white; cursor:pointer; font-size:19px;
-  }
-  .submit-btn:disabled { opacity:.55; cursor:default; }
-  .suggestions {
-    position:absolute; left:0; right:0; top:62px; z-index:10; overflow:hidden;
-    border:1px solid var(--border); border-radius:14px; background:var(--surface);
-    box-shadow:var(--shadow); display:none;
-  }
-  .suggestion { padding:12px 18px; cursor:pointer; display:flex; gap:10px; }
-  .suggestion:hover,.suggestion.selected { background:var(--surface-2); }
+html[data-theme="light"] {
+  --bg: #ffffff;
+  --text: #202124;
+  --muted: #5f6368;
+  --border: #dadce0;
+  --card: #ffffff;
+  --hover: #f8f9fa;
+  --accent: #1a73e8;
+}
 
-  .results-area { width:min(100%,820px); margin:auto; }
-  .toolbar { display:flex; align-items:center; gap:8px; border-bottom:1px solid var(--border); margin-bottom:18px; overflow:auto; }
-  .tab {
-    border:0; background:transparent; color:var(--muted); padding:11px 13px;
-    cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent;
-  }
-  .tab.active { color:var(--accent); border-bottom-color:var(--accent); font-weight:700; }
-  .status { color:var(--muted); padding:22px 4px; text-align:center; }
-  .error { color:#c5221f; }
-  .result {
-    padding:18px 0; border-bottom:1px solid var(--border);
-  }
-  .result-top { display:flex; gap:16px; }
-  .result-main { flex:1; min-width:0; }
-  .result-title {
-    display:block; color:var(--accent); font-size:19px; line-height:1.35;
-    text-decoration:none; font-weight:600; margin-bottom:5px; overflow-wrap:anywhere;
-  }
-  .result-title:hover { text-decoration:underline; }
-  .result-url { color:var(--muted); font-size:13px; margin-bottom:7px; overflow-wrap:anywhere; }
-  .result-desc { color:var(--text); line-height:1.55; font-size:14px; }
-  .result-meta { color:var(--muted); font-size:12px; margin-top:8px; }
-  .thumb {
-    width:120px; height:82px; object-fit:cover; border-radius:10px;
-    border:1px solid var(--border); background:var(--surface-2); flex:none;
-  }
-  .special-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin-bottom:18px; }
-  .card {
-    background:var(--surface); border:1px solid var(--border); border-radius:16px;
-    padding:17px; box-shadow:0 1px 2px rgba(0,0,0,.04);
-  }
-  .card h2 { margin:0 0 9px; font-size:17px; }
-  .card p { margin:5px 0; line-height:1.45; }
-  .muted { color:var(--muted); }
-  .image-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-bottom:20px; }
-  .image-card { border:1px solid var(--border); border-radius:12px; overflow:hidden; background:var(--surface); text-decoration:none; color:var(--text); }
-  .image-card img { width:100%; aspect-ratio:1/1; object-fit:cover; display:block; }
-  .image-card div { padding:9px; font-size:13px; line-height:1.35; }
-  .video-list { display:grid; gap:10px; margin-bottom:20px; }
-  .video-card { display:flex; gap:14px; padding:12px; border:1px solid var(--border); border-radius:12px; text-decoration:none; color:var(--text); background:var(--surface); }
-  .video-card img { width:150px; height:84px; object-fit:cover; border-radius:8px; flex:none; }
-  .video-card strong { display:block; margin-bottom:6px; }
-  .pill { display:inline-block; font-size:12px; color:var(--muted); padding:4px 8px; border:1px solid var(--border); border-radius:20px; margin-top:5px; }
+html[data-theme="dark"] {
+  --bg: #202124;
+  --text: #e8eaed;
+  --muted: #9aa0a6;
+  --border: #3c4043;
+  --card: #292a2d;
+  --hover: #303134;
+  --accent: #8ab4f8;
+}
 
-  .map-list { display:grid; gap:10px; }
-  .place { padding:13px 0; border-top:1px solid var(--border); }
-  .place:first-child { border-top:0; }
-  .place-name { font-weight:700; }
-  .place-address { color:var(--muted); margin-top:4px; font-size:13px; }
-  .map-link { display:inline-block; margin-top:7px; color:var(--accent); text-decoration:none; font-size:13px; }
-  .map-link:hover { text-decoration:underline; }
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background .2s, color .2s;
+}
 
-  .footer-note { color:var(--muted); text-align:center; font-size:12px; padding:25px 0; }
+header {
+  padding: 22px 20px 10px;
+  text-align: center;
+}
 
-  @media (max-width:700px) {
-    header { padding:10px 12px; }
-    main { padding:5vh 14px 35px; }
-    .logo { font-size:54px; margin-bottom:22px; }
-    .search-box { height:52px; }
-    .submit-btn { width:38px; height:38px; }
-    .search-icon { top:15px; }
-    .special-grid { grid-template-columns:1fr; }
-    .image-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
-    .result-top { flex-direction:column-reverse; }
-    .thumb { width:100%; height:180px; }
-    .video-card img { width:115px; height:70px; }
+.logo {
+  font-size: 44px;
+  margin-bottom: 12px;
+}
+
+.search-area {
+  width: min(760px, 94%);
+  margin: auto;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 4px 8px 4px 16px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.search-box:focus-within {
+  border-color: var(--accent);
+}
+
+.search-box input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 17px;
+  padding: 12px 8px;
+}
+
+.search-button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.search-button:hover {
+  color: var(--accent);
+}
+
+.controls {
+  width: min(900px, 94%);
+  margin: 20px auto 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tab {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 20px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.tab.active,
+.tab:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.settings {
+  width: min(900px, 94%);
+  margin: 12px auto;
+  text-align: right;
+}
+
+.settings select {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+
+#status {
+  width: min(900px, 94%);
+  margin: 20px auto;
+  color: var(--muted);
+  text-align: center;
+}
+
+#results {
+  width: min(900px, 94%);
+  margin: 0 auto 60px;
+}
+
+.result {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.result-url {
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.result h2 {
+  margin: 5px 0;
+  font-size: 21px;
+  font-weight: 500;
+}
+
+.result h2 a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.result h2 a:hover {
+  text-decoration: underline;
+}
+
+.result p {
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+.date {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  margin: 18px 0;
+  box-shadow: var(--shadow);
+}
+
+.card h3 {
+  margin-top: 0;
+}
+
+.answer {
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.knowledge-title {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+}
+
+.feature-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.feature-card h3 {
+  margin-top: 0;
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.image-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--card);
+}
+
+.image-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+.image-card div {
+  padding: 10px;
+  font-size: 14px;
+}
+
+.video-list {
+  display: grid;
+  gap: 12px;
+}
+
+.video-item {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.video-item a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.map-list {
+  display: grid;
+  gap: 10px;
+}
+
+.map-place {
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.map-place a {
+  color: var(--accent);
+}
+
+.related a {
+  display: block;
+  padding: 8px 0;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.loading {
+  padding: 35px;
+  text-align: center;
+}
+
+.error {
+  color: #d93025;
+}
+
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .logo {
+    font-size: 36px;
   }
-  @media (prefers-reduced-motion:reduce) {
-    * { scroll-behavior:auto !important; transition:none !important; }
+
+  .result h2 {
+    font-size: 18px;
   }
+}
 </style>
 </head>
+
 <body>
-<div class="page">
-  <header>
-    <div class="theme-wrap">
-      <button class="icon-btn" id="themeButton" aria-label="Theme" aria-haspopup="menu" aria-expanded="false">◐</button>
-      <div class="theme-menu" id="themeMenu" role="menu">
-        <button class="theme-option" data-theme-choice="system" role="menuitem">System</button>
-        <button class="theme-option" data-theme-choice="light" role="menuitem">Light</button>
-        <button class="theme-option" data-theme-choice="dark" role="menuitem">Dark</button>
-      </div>
-    </div>
-  </header>
 
-  <main>
-    <section class="hero">
-      <div class="logo" aria-label="Search">🔍</div>
-      <form class="search-form" id="searchForm" autocomplete="off">
-        <span class="search-icon" aria-hidden="true">⌕</span>
-        <input id="searchInput" class="search-box" type="search" placeholder="Search the web" aria-label="Search the web" spellcheck="false">
-        <button class="submit-btn" id="submitButton" type="submit" aria-label="Search">➜</button>
-        <div class="suggestions" id="suggestions" role="listbox"></div>
-      </form>
-    </section>
+<header>
+  <div class="logo">🔍</div>
 
-    <section class="results-area" id="resultsArea" aria-live="polite"></section>
-  </main>
+  <div class="search-area">
+    <form class="search-box" id="searchForm">
+      <input
+        id="query"
+        type="search"
+        placeholder="Search the web"
+        autocomplete="off"
+        spellcheck="false"
+        required
+      >
+      <button class="search-button" type="submit" aria-label="Search">🔍</button>
+    </form>
+  </div>
+</header>
+
+<div class="controls">
+  <button class="tab active" data-type="web">Web</button>
+  <button class="tab" data-type="images">Images</button>
+  <button class="tab" data-type="news">News</button>
+  <button class="tab" data-type="videos">Videos</button>
 </div>
 
+<div class="settings">
+  <label>
+    Theme:
+    <select id="theme">
+      <option value="system">System</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+  </label>
+</div>
+
+<div id="status"></div>
+<main id="results"></main>
+
 <script>
-/* ============================================================
+/* =========================================================
    API KEY
-   Replace ONLY the word UNDICLOSED below with your API key.
-   Do not change anything else in this line.
-   ============================================================ */
+   ========================================================= */
+
 const API_KEY = "ezGeMU9TnuXNnmytZSSScsbL";
 
-/* ============================================================
-   API configuration
-   ============================================================ */
+
+/* =========================================================
+   API
+   ========================================================= */
+
 const API_URL = "https://serpapi.com/search";
 
-const state = {
-  query: "",
-  data: null,
-  type: "web",
-  theme: localStorage.getItem("theme-preference") || "system"
-};
 
-const root = document.documentElement;
-const searchForm = document.getElementById("searchForm");
-const searchInput = document.getElementById("searchInput");
-const submitButton = document.getElementById("submitButton");
-const resultsArea = document.getElementById("resultsArea");
-const suggestions = document.getElementById("suggestions");
-const themeButton = document.getElementById("themeButton");
-const themeMenu = document.getElementById("themeMenu");
-const media = window.matchMedia("(prefers-color-scheme: dark)");
+/* =========================================================
+   THEME
+   ========================================================= */
 
-function applyTheme() {
-  const pref = state.theme;
-  const dark = pref === "dark" || (pref === "system" && media.matches);
-  root.dataset.theme = dark ? "dark" : "light";
+const themeSelect = document.getElementById("theme");
 
-  document.querySelectorAll(".theme-option").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.themeChoice === pref);
-  });
-}
-
-function setTheme(pref) {
-  state.theme = pref;
-  localStorage.setItem("theme-preference", pref);
-  applyTheme();
-  themeMenu.classList.remove("open");
-  themeButton.setAttribute("aria-expanded", "false");
-}
-
-applyTheme();
-
-if (media.addEventListener) {
-  media.addEventListener("change", () => {
-    if (state.theme === "system") applyTheme();
-  });
-} else if (media.addListener) {
-  media.addListener(() => {
-    if (state.theme === "system") applyTheme();
-  });
-}
-
-themeButton.addEventListener("click", () => {
-  const open = themeMenu.classList.toggle("open");
-  themeButton.setAttribute("aria-expanded", String(open));
-});
-
-document.querySelectorAll(".theme-option").forEach(btn => {
-  btn.addEventListener("click", () => setTheme(btn.dataset.themeChoice));
-});
-
-document.addEventListener("click", e => {
-  if (!e.target.closest(".theme-wrap")) {
-    themeMenu.classList.remove("open");
-    themeButton.setAttribute("aria-expanded", "false");
+function applyTheme(theme) {
+  if (theme === "system") {
+    document.documentElement.removeAttribute("data-theme");
+  } else {
+    document.documentElement.setAttribute("data-theme", theme);
   }
+}
+
+const savedTheme = localStorage.getItem("search-theme") || "system";
+
+themeSelect.value = savedTheme;
+applyTheme(savedTheme);
+
+themeSelect.addEventListener("change", () => {
+  const theme = themeSelect.value;
+
+  localStorage.setItem("search-theme", theme);
+  applyTheme(theme);
 });
+
+
+/* =========================================================
+   ELEMENTS
+   ========================================================= */
+
+const form = document.getElementById("searchForm");
+const queryInput = document.getElementById("query");
+const resultsEl = document.getElementById("results");
+const statusEl = document.getElementById("status");
+
+let currentType = "web";
+let lastData = null;
+let lastQuery = "";
+
+
+/* =========================================================
+   TABS
+   ========================================================= */
+
+document.querySelectorAll(".tab").forEach(button => {
+  button.addEventListener("click", () => {
+
+    document.querySelectorAll(".tab").forEach(b => {
+      b.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    currentType = button.dataset.type;
+
+    if (lastData) {
+      renderData(lastData, currentType);
+    }
+  });
+});
+
+
+/* =========================================================
+   SECURITY HELPERS
+   ========================================================= */
 
 function escapeHTML(value) {
   return String(value ?? "")
@@ -264,418 +465,907 @@ function escapeHTML(value) {
 
 function safeURL(value) {
   try {
-    const u = new URL(value);
-    if (u.protocol === "http:" || u.protocol === "https:") return u.href;
-  } catch {}
-  return "";
-}
+    const url = new URL(value);
 
-function hostFromURL(value) {
-  try { return new URL(value).hostname; } catch { return ""; }
-}
+    if (
+      url.protocol === "http:" ||
+      url.protocol === "https:"
+    ) {
+      return url.href;
+    }
 
-function showStatus(text, isError = false) {
-  resultsArea.innerHTML = `<div class="status ${isError ? "error" : ""}">${escapeHTML(text)}</div>`;
-}
-
-function setLoading(loading) {
-  submitButton.disabled = loading;
-  submitButton.textContent = loading ? "…" : "➜";
-}
-
-function getResults(data) {
-  return Array.isArray(data?.results) ? data.results : [];
-}
-
-function getFeature(data, key) {
-  return data?.features?.[key];
-}
-
-function getAvailability(data, key) {
-  return data?.featureAvailability?.[key] === true;
-}
-
-function renderTabs(data) {
-  const tabs = [
-    ["web", "Web"],
-    ["images", "Images"],
-    ["news", "News"],
-    ["videos", "Videos"]
-  ];
-
-  const available = tabs.filter(([key]) => {
-    if (key === "web") return true;
-    return getAvailability(data, key) || Array.isArray(getFeature(data, key));
-  });
-
-  return `<nav class="toolbar" aria-label="Search types">
-    ${available.map(([key, label]) =>
-      `<button class="tab ${state.type === key ? "active" : ""}" data-type="${key}">${label}</button>`
-    ).join("")}
-  </nav>`;
-}
-
-function renderSpecialCards(data) {
-  const cards = [];
-
-  if (getAvailability(data, "answerBox") && getFeature(data, "answerBox")) {
-    const a = getFeature(data, "answerBox");
-    cards.push(`
-      <article class="card">
-        <h2>${escapeHTML(a.title || "Answer")}</h2>
-        ${a.answer ? `<p>${escapeHTML(a.answer)}</p>` : ""}
-        ${a.snippet ? `<p>${escapeHTML(a.snippet)}</p>` : ""}
-      </article>
-    `);
+    return "#";
+  } catch {
+    return "#";
   }
-
-  if (getAvailability(data, "knowledgeGraph") && getFeature(data, "knowledgeGraph")) {
-    const k = getFeature(data, "knowledgeGraph");
-    cards.push(`
-      <article class="card">
-        <h2>${escapeHTML(k.title || k.name || "Information")}</h2>
-        ${k.type ? `<p class="muted">${escapeHTML(k.type)}</p>` : ""}
-        ${k.description ? `<p>${escapeHTML(k.description)}</p>` : ""}
-      </article>
-    `);
-  }
-
-  if (getAvailability(data, "calculator") && getFeature(data, "calculator")) {
-    const c = getFeature(data, "calculator");
-    cards.push(`
-      <article class="card">
-        <h2>Calculator</h2>
-        <p style="font-size:24px;font-weight:700">${escapeHTML(c.result || c.answer || "")}</p>
-        ${c.expression ? `<p class="muted">${escapeHTML(c.expression)}</p>` : ""}
-      </article>
-    `);
-  }
-
-  if (getAvailability(data, "weather") && getFeature(data, "weather")) {
-    const w = getFeature(data, "weather");
-    cards.push(`
-      <article class="card">
-        <h2>${escapeHTML(w.location || w.city || "Weather")}</h2>
-        ${w.temperature ? `<p style="font-size:24px;font-weight:700">${escapeHTML(w.temperature)}</p>` : ""}
-        ${w.description ? `<p>${escapeHTML(w.description)}</p>` : ""}
-      </article>
-    `);
-  }
-
-  if (getAvailability(data, "finance") && getFeature(data, "finance")) {
-    const f = getFeature(data, "finance");
-    const items = Array.isArray(f) ? f : [f];
-    const useful = items.slice(0, 4);
-    cards.push(`
-      <article class="card">
-        <h2>Finance</h2>
-        ${useful.map(item => `
-          <p><strong>${escapeHTML(item.name || item.symbol || item.ticker || "")}</strong>
-          ${item.price != null ? ` — ${escapeHTML(item.price)}` : ""}
-          ${item.change != null ? ` <span class="muted">${escapeHTML(item.change)}</span>` : ""}</p>
-        `).join("")}
-      </article>
-    `);
-  }
-
-  return cards.length ? `<div class="special-grid">${cards.join("")}</div>` : "";
 }
 
-function renderMap(data) {
-  if (!getAvailability(data, "map")) return "";
 
-  const map = getFeature(data, "map");
-  const places = Array.isArray(map?.results) ? map.results : [];
+/* =========================================================
+   SEARCH
+   ========================================================= */
 
-  if (!places.length) return "";
+form.addEventListener("submit", event => {
+  event.preventDefault();
 
-  return `
-    <article class="card" style="margin-bottom:18px">
-      <h2>Places</h2>
-      <div class="map-list">
-        ${places.slice(0, 8).map(place => {
-          const name = place.title || place.name || "Place";
-          const address = place.address || "";
-          const gps = place.gps_coordinates;
-          let mapURL = "";
+  const query = queryInput.value.trim();
 
-          if (gps && Number.isFinite(Number(gps.latitude)) && Number.isFinite(Number(gps.longitude))) {
-            mapURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(Number(gps.latitude) + "," + Number(gps.longitude))}`;
-          } else if (address) {
-            mapURL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
-          }
-
-          return `
-            <div class="place">
-              <div class="place-name">${escapeHTML(name)}</div>
-              ${address ? `<div class="place-address">${escapeHTML(address)}</div>` : ""}
-              ${mapURL ? `<a class="map-link" href="${escapeHTML(mapURL)}" target="_blank" rel="noopener noreferrer">Open in Maps ↗</a>` : ""}
-            </div>
-          `;
-        }).join("")}
-      </div>
-    </article>
-  `;
-}
-
-function renderImages(data) {
-  const items = Array.isArray(getFeature(data, "images")) ? getFeature(data, "images") : [];
-  if (!items.length) return "";
-
-  return `
-    <div class="image-grid">
-      ${items.slice(0, 24).map(item => {
-        const image = safeURL(item.original || item.thumbnail || item.image);
-        const link = safeURL(item.link || item.source || image);
-        if (!image) return "";
-        return `
-          <a class="image-card" href="${escapeHTML(link || image)}" target="_blank" rel="noopener noreferrer">
-            <img src="${escapeHTML(image)}" alt="${escapeHTML(item.title || "Image")}" loading="lazy" referrerpolicy="no-referrer">
-            <div>${escapeHTML(item.title || item.source || "")}</div>
-          </a>
-        `;
-      }).join("")}
-    </div>
-  `;
-}
-
-function renderVideos(data) {
-  const items = Array.isArray(getFeature(data, "videos")) ? getFeature(data, "videos") : [];
-  if (!items.length) return "";
-
-  return `
-    <div class="video-list">
-      ${items.slice(0, 15).map(item => {
-        const link = safeURL(item.link || item.url);
-        const image = safeURL(item.thumbnail || item.image);
-        if (!link) return "";
-        return `
-          <a class="video-card" href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer">
-            ${image ? `<img src="${escapeHTML(image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ""}
-            <div>
-              <strong>${escapeHTML(item.title || "Video")}</strong>
-              ${item.snippet ? `<div class="muted">${escapeHTML(item.snippet)}</div>` : ""}
-              ${item.source ? `<span class="pill">${escapeHTML(item.source)}</span>` : ""}
-            </div>
-          </a>
-        `;
-      }).join("")}
-    </div>
-  `;
-}
-
-function renderWebResults(results) {
-  if (!results.length) {
-    return `<div class="status">No results found.</div>`;
-  }
-
-  return results.map(item => {
-    const link = safeURL(item.url);
-    if (!link) return "";
-
-    const thumb = safeURL(item.thumbnail);
-
-    return `
-      <article class="result">
-        <div class="result-top">
-          <div class="result-main">
-            <a class="result-title" href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer">
-              ${escapeHTML(item.title || "Untitled result")}
-            </a>
-            <div class="result-url">${escapeHTML(item.displayUrl || hostFromURL(link))}</div>
-            ${item.description ? `<div class="result-desc">${escapeHTML(item.description)}</div>` : ""}
-            ${(item.source || item.date) ? `<div class="result-meta">${escapeHTML([item.source, item.date].filter(Boolean).join(" · "))}</div>` : ""}
-          </div>
-          ${thumb ? `<img class="thumb" src="${escapeHTML(thumb)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ""}
-        </div>
-      </article>
-    `;
-  }).join("");
-}
-
-function renderNews(data) {
-  const items = Array.isArray(getFeature(data, "news")) ? getFeature(data, "news") : [];
-  if (!items.length) return renderWebResults(getResults(data));
-
-  return items.slice(0, 30).map(item => {
-    const link = safeURL(item.link || item.url);
-    if (!link) return "";
-    const image = safeURL(item.thumbnail || item.image);
-    return `
-      <article class="result">
-        <div class="result-top">
-          <div class="result-main">
-            <a class="result-title" href="${escapeHTML(link)}" target="_blank" rel="noopener noreferrer">${escapeHTML(item.title || "News")}</a>
-            <div class="result-url">${escapeHTML(item.source || hostFromURL(link))}</div>
-            ${item.snippet ? `<div class="result-desc">${escapeHTML(item.snippet)}</div>` : ""}
-            ${item.date ? `<div class="result-meta">${escapeHTML(item.date)}</div>` : ""}
-          </div>
-          ${image ? `<img class="thumb" src="${escapeHTML(image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ""}
-        </div>
-      </article>
-    `;
-  }).join("");
-}
-
-function renderContent(data) {
-  const tabs = renderTabs(data);
-
-  if (state.type === "images") {
-    const images = renderImages(data);
-    return tabs + (images || `<div class="status">No image results were returned.</div>`);
-  }
-
-  if (state.type === "videos") {
-    const videos = renderVideos(data);
-    return tabs + (videos || `<div class="status">No video results were returned.</div>`);
-  }
-
-  if (state.type === "news") {
-    return tabs + renderSpecialCards(data) + renderNews(data);
-  }
-
-  return tabs
-    + renderSpecialCards(data)
-    + renderMap(data)
-    + renderWebResults(getResults(data));
-}
-
-function render(data) {
-  resultsArea.innerHTML = renderContent(data);
-
-  resultsArea.querySelectorAll(".tab").forEach(tab => {
-    tab.addEventListener("click", () => {
-      state.type = tab.dataset.type;
-      render(state.data);
-    });
-  });
-}
-
-async function performSearch(query, type = "web") {
-  query = query.trim();
   if (!query) return;
 
-  state.query = query;
-  state.type = type;
-  setLoading(true);
-  showStatus("Searching…");
+  performSearch(query);
+});
+
+
+async function performSearch(query) {
+
+  lastQuery = query;
+
+  resultsEl.innerHTML = `
+    <div class="loading">
+      Searching…
+    </div>
+  `;
+
+  statusEl.textContent = "";
 
   try {
-    const url = new URL(API_URL);
-    url.searchParams.set("engine", "google");
-    url.searchParams.set("q", query);
-    url.searchParams.set("google_domain", "google.com");
-    url.searchParams.set("hl", "en");
-    url.searchParams.set("gl", "us");
-    url.searchParams.set("num", "100");
-    url.searchParams.set("api_key", API_KEY);
 
-    const response = await fetch(url.href);
+    const params = new URLSearchParams();
+
+    params.set("engine", "google");
+    params.set("q", query);
+    params.set("google_domain", "google.com");
+    params.set("hl", "en");
+    params.set("gl", "us");
+
+    /*
+      100 means "request up to 100".
+      SerpApi decides how many Google results are actually available.
+      This remains ONE API request.
+    */
+    params.set("num", "100");
+
+    params.set("api_key", API_KEY);
+
+    const response = await fetch(
+      API_URL + "?" + params.toString(),
+      {
+        method: "GET",
+        cache: "no-store"
+      }
+    );
+
+    const text = await response.text();
 
     let data;
+
     try {
-      data = await response.json();
+      data = JSON.parse(text);
     } catch {
-      throw new Error("The search service returned an invalid response.");
+      throw new Error(
+        "The API returned an invalid response."
+      );
     }
 
     if (!response.ok || data.error) {
-      throw new Error(data.error || "Search failed.");
+      throw new Error(
+        data.error ||
+        "The search API returned an error."
+      );
     }
 
-    /*
-      Normalize direct SerpApi responses into the same structure
-      used by the richer Worker version.
-    */
-    data.results = Array.isArray(data.organic_results)
-      ? data.organic_results.map(item => ({
-          title: item.title || "",
-          url: item.link || "",
-          description: item.snippet || "",
-          displayUrl: item.displayed_link || item.source || item.link || "",
-          thumbnail: item.thumbnail || null,
-          source: item.source || "",
-          date: item.date || ""
-        }))
-      : [];
+    lastData = data;
 
-    data.features = data.features || {};
-
-    if (data.finance_results) data.features.finance = data.finance_results;
-    if (Array.isArray(data.local_results)) data.features.local = data.local_results;
-    if (data.knowledge_graph) data.features.knowledgeGraph = data.knowledge_graph;
-    if (data.answer_box) data.features.answerBox = data.answer_box;
-    if (data.calculator_result) data.features.calculator = data.calculator_result;
-    if (data.weather_result) data.features.weather = data.weather_result;
-    if (data.sports_results) data.features.sports = data.sports_results;
-    if (Array.isArray(data.events_results)) data.features.events = data.events_results;
-    if (Array.isArray(data.shopping_results)) data.features.shopping = data.shopping_results;
-    if (Array.isArray(data.images_results)) data.features.images = data.images_results;
-    if (Array.isArray(data.video_results)) data.features.videos = data.video_results;
-    if (Array.isArray(data.videos_results)) data.features.videos = data.videos_results;
-    if (Array.isArray(data.news_results)) data.features.news = data.news_results;
-
-    const local = Array.isArray(data.local_results) ? data.local_results.filter(place => {
-      const gps = place?.gps_coordinates;
-      return (
-        (gps && Number.isFinite(Number(gps.latitude)) && Number.isFinite(Number(gps.longitude))) ||
-        (typeof place?.address === "string" && place.address.trim())
-      );
-    }) : [];
-
-    data.features.map = {
-      available: local.length > 0,
-      results: local
-    };
-
-    data.featureAvailability = {
-      finance: !!data.finance_results,
-      local: Array.isArray(data.local_results) && data.local_results.length > 0,
-      knowledgeGraph: !!data.knowledge_graph,
-      answerBox: !!data.answer_box,
-      calculator: !!data.calculator_result,
-      weather: !!data.weather_result,
-      sports: !!data.sports_results,
-      events: Array.isArray(data.events_results) && data.events_results.length > 0,
-      shopping: Array.isArray(data.shopping_results) && data.shopping_results.length > 0,
-      images: Array.isArray(data.images_results) && data.images_results.length > 0,
-      videos: (Array.isArray(data.video_results) && data.video_results.length > 0) ||
-              (Array.isArray(data.videos_results) && data.videos_results.length > 0),
-      news: Array.isArray(data.news_results) && data.news_results.length > 0,
-      map: local.length > 0,
-      graph: !!data.finance_results
-    };
-
-    state.data = data;
-    render(data);
+    renderData(data, currentType);
 
   } catch (error) {
-    state.data = null;
-    showStatus(error.message || "Something went wrong.", true);
-  } finally {
-    setLoading(false);
+
+    console.error(error);
+
+    resultsEl.innerHTML = `
+      <div class="card error">
+        <h3>Search failed</h3>
+        <p>${escapeHTML(error.message)}</p>
+        <p>
+          If this page is being opened directly as a
+          <code>file://</code> file, open it through an HTTPS
+          website instead.
+        </p>
+      </div>
+    `;
+
+    statusEl.textContent = "";
   }
 }
 
-searchForm.addEventListener("submit", event => {
-  event.preventDefault();
-  performSearch(searchInput.value);
-  suggestions.style.display = "none";
-});
 
-searchInput.addEventListener("keydown", event => {
-  if (event.key === "Escape") {
-    suggestions.style.display = "none";
+/* =========================================================
+   MAIN RENDERER
+   ========================================================= */
+
+function renderData(data, type) {
+
+  resultsEl.innerHTML = "";
+
+  if (type === "images") {
+    renderImages(data);
+    return;
+  }
+
+  if (type === "news") {
+    renderNews(data);
+    return;
+  }
+
+  if (type === "videos") {
+    renderVideos(data);
+    return;
+  }
+
+  renderWeb(data);
+}
+
+
+/* =========================================================
+   WEB
+   ========================================================= */
+
+function renderWeb(data) {
+
+  const featureContainer = document.createElement("div");
+
+  renderSpecialFeatures(data, featureContainer);
+
+  resultsEl.appendChild(featureContainer);
+
+  const results =
+    Array.isArray(data.organic_results)
+      ? data.organic_results
+      : [];
+
+  if (!results.length) {
+
+    if (!featureContainer.innerHTML) {
+      resultsEl.innerHTML = `
+        <div class="card">
+          No web results were returned.
+        </div>
+      `;
+    }
+
+    return;
+  }
+
+  const heading = document.createElement("div");
+
+  heading.innerHTML = `
+    <p style="color:var(--muted)">
+      Web results for
+      <strong>${escapeHTML(lastQuery)}</strong>
+    </p>
+  `;
+
+  resultsEl.appendChild(heading);
+
+  for (const item of results) {
+
+    const link = safeURL(item.link);
+
+    const div = document.createElement("article");
+
+    div.className = "result";
+
+    div.innerHTML = `
+      <div class="result-url">
+        ${escapeHTML(item.displayed_link || item.link || "")}
+      </div>
+
+      <h2>
+        <a href="${link}" target="_blank" rel="noopener noreferrer">
+          ${escapeHTML(item.title || "Untitled")}
+        </a>
+      </h2>
+
+      <p>
+        ${escapeHTML(item.snippet || "")}
+      </p>
+
+      ${
+        item.date
+          ? `<div class="date">${escapeHTML(item.date)}</div>`
+          : ""
+      }
+    `;
+
+    resultsEl.appendChild(div);
+  }
+
+  renderRelated(data);
+}
+
+
+/* =========================================================
+   SPECIAL FEATURES
+   ========================================================= */
+
+function renderSpecialFeatures(data, container) {
+
+  let added = false;
+
+  /* Answer box */
+
+  if (data.answer_box) {
+
+    const box = data.answer_box;
+
+    let answer =
+      box.answer ||
+      box.snippet ||
+      box.result ||
+      "";
+
+    if (answer) {
+
+      const card = document.createElement("div");
+
+      card.className = "card";
+
+      card.innerHTML = `
+        <h3>Answer</h3>
+        <div class="answer">
+          ${escapeHTML(answer)}
+        </div>
+      `;
+
+      container.appendChild(card);
+
+      added = true;
+    }
+  }
+
+
+  /* Knowledge graph */
+
+  if (data.knowledge_graph) {
+
+    const kg = data.knowledge_graph;
+
+    const title =
+      kg.title ||
+      kg.name ||
+      "";
+
+    const description =
+      kg.description ||
+      kg.type ||
+      "";
+
+    if (title || description) {
+
+      const card = document.createElement("div");
+
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="knowledge-title">
+          ${escapeHTML(title)}
+        </div>
+
+        ${
+          description
+            ? `<p>${escapeHTML(description)}</p>`
+            : ""
+        }
+
+        ${
+          kg.website
+            ? `
+              <p>
+                <a
+                  href="${safeURL(kg.website)}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Official website
+                </a>
+              </p>
+            `
+            : ""
+        }
+      `;
+
+      container.appendChild(card);
+
+      added = true;
+    }
+  }
+
+
+  /* Calculator */
+
+  if (data.calculator_result) {
+
+    const value =
+      typeof data.calculator_result === "object"
+        ? data.calculator_result.result
+        : data.calculator_result;
+
+    if (value !== undefined && value !== null) {
+
+      const card = document.createElement("div");
+
+      card.className = "card";
+
+      card.innerHTML = `
+        <h3>Calculator</h3>
+        <div class="answer">
+          ${escapeHTML(value)}
+        </div>
+      `;
+
+      container.appendChild(card);
+
+      added = true;
+    }
+  }
+
+
+  /* Weather */
+
+  if (data.weather_result) {
+
+    const weather = data.weather_result;
+
+    const card = document.createElement("div");
+
+    card.className = "card";
+
+    card.innerHTML = `
+      <h3>Weather</h3>
+
+      <div class="feature-grid">
+
+        ${
+          weather.temperature !== undefined
+            ? `
+              <div class="feature-card">
+                <strong>Temperature</strong>
+                <div>
+                  ${escapeHTML(weather.temperature)}
+                  ${escapeHTML(weather.unit || "")}
+                </div>
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          weather.condition
+            ? `
+              <div class="feature-card">
+                <strong>Condition</strong>
+                <div>${escapeHTML(weather.condition)}</div>
+              </div>
+            `
+            : ""
+        }
+
+        ${
+          weather.location
+            ? `
+              <div class="feature-card">
+                <strong>Location</strong>
+                <div>${escapeHTML(weather.location)}</div>
+              </div>
+            `
+            : ""
+        }
+
+      </div>
+    `;
+
+    container.appendChild(card);
+
+    added = true;
+  }
+
+
+  /* Finance */
+
+  if (Array.isArray(data.finance_results) &&
+      data.finance_results.length) {
+
+    const card = document.createElement("div");
+
+    card.className = "card";
+
+    card.innerHTML = `<h3>Finance</h3>`;
+
+    const grid = document.createElement("div");
+
+    grid.className = "feature-grid";
+
+    for (const item of data.finance_results) {
+
+      const symbol =
+        item.symbol ||
+        item.ticker ||
+        "";
+
+      const name =
+        item.name ||
+        item.title ||
+        "";
+
+      const price =
+        item.price ??
+        item.price_text ??
+        "";
+
+      const change =
+        item.change ??
+        item.change_percentage ??
+        "";
+
+      const box = document.createElement("div");
+
+      box.className = "feature-card";
+
+      box.innerHTML = `
+        <h3>${escapeHTML(name || symbol)}</h3>
+
+        ${
+          price !== ""
+            ? `<div class="answer">${escapeHTML(price)}</div>`
+            : ""
+        }
+
+        ${
+          change !== ""
+            ? `<p>${escapeHTML(change)}</p>`
+            : ""
+        }
+      `;
+
+      grid.appendChild(box);
+    }
+
+    card.appendChild(grid);
+    container.appendChild(card);
+
+    added = true;
+  }
+
+
+  /* Local results / maps */
+
+  if (Array.isArray(data.local_results) &&
+      data.local_results.length) {
+
+    const card = document.createElement("div");
+
+    card.className = "card";
+
+    card.innerHTML = `<h3>Places</h3>`;
+
+    const list = document.createElement("div");
+
+    list.className = "map-list";
+
+    for (const place of data.local_results) {
+
+      const name =
+        place.title ||
+        place.name ||
+        "Place";
+
+      const address =
+        place.address ||
+        "";
+
+      let mapsURL = "";
+
+      if (
+        typeof place.gps_coordinates === "object" &&
+        place.gps_coordinates
+      ) {
+
+        const lat = place.gps_coordinates.latitude;
+        const lon = place.gps_coordinates.longitude;
+
+        if (
+          typeof lat === "number" &&
+          typeof lon === "number"
+        ) {
+          mapsURL =
+            "https://www.google.com/maps/search/?api=1&query=" +
+            encodeURIComponent(lat + "," + lon);
+        }
+      }
+
+      if (!mapsURL) {
+
+        mapsURL =
+          "https://www.google.com/maps/search/?api=1&query=" +
+          encodeURIComponent(
+            name + " " + address
+          );
+      }
+
+      const item = document.createElement("div");
+
+      item.className = "map-place";
+
+      item.innerHTML = `
+        <strong>${escapeHTML(name)}</strong>
+
+        ${
+          address
+            ? `<div>${escapeHTML(address)}</div>`
+            : ""
+        }
+
+        <div style="margin-top:8px">
+          <a
+            href="${safeURL(mapsURL)}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open in Maps
+          </a>
+        </div>
+      `;
+
+      list.appendChild(item);
+    }
+
+    card.appendChild(list);
+    container.appendChild(card);
+
+    added = true;
+  }
+
+  return added;
+}
+
+
+/* =========================================================
+   IMAGES
+   ========================================================= */
+
+function renderImages(data) {
+
+  const images =
+    Array.isArray(data.images_results)
+      ? data.images_results
+      : [];
+
+  if (!images.length) {
+
+    resultsEl.innerHTML = `
+      <div class="card">
+        No image results were returned.
+      </div>
+    `;
+
+    return;
+  }
+
+  const heading = document.createElement("div");
+
+  heading.innerHTML = `
+    <p style="color:var(--muted)">
+      Images for
+      <strong>${escapeHTML(lastQuery)}</strong>
+    </p>
+  `;
+
+  resultsEl.appendChild(heading);
+
+  const grid = document.createElement("div");
+
+  grid.className = "images-grid";
+
+  for (const image of images) {
+
+    const imageURL =
+      safeURL(
+        image.original ||
+        image.thumbnail ||
+        ""
+      );
+
+    const sourceURL =
+      safeURL(
+        image.link ||
+        image.source ||
+        ""
+      );
+
+    if (imageURL === "#") continue;
+
+    const card = document.createElement("div");
+
+    card.className = "image-card";
+
+    card.innerHTML = `
+      <a
+        href="${imageURL}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img
+          src="${imageURL}"
+          loading="lazy"
+          alt="${escapeHTML(image.title || "")}"
+          onerror="this.parentElement.parentElement.style.display='none'"
+        >
+      </a>
+
+      <div>
+        ${
+          image.title
+            ? `<div>${escapeHTML(image.title)}</div>`
+            : ""
+        }
+
+        ${
+          sourceURL !== "#"
+            ? `
+              <div style="margin-top:6px">
+                <a
+                  href="${sourceURL}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Source
+                </a>
+              </div>
+            `
+            : ""
+        }
+      </div>
+    `;
+
+    grid.appendChild(card);
+  }
+
+  resultsEl.appendChild(grid);
+}
+
+
+/* =========================================================
+   NEWS
+   ========================================================= */
+
+function renderNews(data) {
+
+  const news =
+    Array.isArray(data.news_results)
+      ? data.news_results
+      : (
+          Array.isArray(data.top_stories)
+            ? data.top_stories
+            : []
+        );
+
+  if (!news.length) {
+
+    resultsEl.innerHTML = `
+      <div class="card">
+        No news results were returned.
+      </div>
+    `;
+
+    return;
+  }
+
+  for (const item of news) {
+
+    const link =
+      safeURL(
+        item.link ||
+        item.url ||
+        ""
+      );
+
+    const div = document.createElement("article");
+
+    div.className = "result";
+
+    div.innerHTML = `
+      <div class="result-url">
+        ${escapeHTML(
+          item.source ||
+          item.publisher ||
+          ""
+        )}
+      </div>
+
+      <h2>
+        <a
+          href="${link}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ${escapeHTML(
+            item.title ||
+            "News article"
+          )}
+        </a>
+      </h2>
+
+      <p>
+        ${escapeHTML(
+          item.snippet ||
+          item.description ||
+          ""
+        )}
+      </p>
+
+      ${
+        item.date
+          ? `<div class="date">${escapeHTML(item.date)}</div>`
+          : ""
+      }
+    `;
+
+    resultsEl.appendChild(div);
+  }
+}
+
+
+/* =========================================================
+   VIDEOS
+   ========================================================= */
+
+function renderVideos(data) {
+
+  const videos =
+    Array.isArray(data.video_results)
+      ? data.video_results
+      : (
+          Array.isArray(data.videos_results)
+            ? data.videos_results
+            : []
+        );
+
+  if (!videos.length) {
+
+    resultsEl.innerHTML = `
+      <div class="card">
+        No video results were returned.
+      </div>
+    `;
+
+    return;
+  }
+
+  const list = document.createElement("div");
+
+  list.className = "video-list";
+
+  for (const item of videos) {
+
+    const link =
+      safeURL(
+        item.link ||
+        item.url ||
+        ""
+      );
+
+    const div = document.createElement("div");
+
+    div.className = "video-item";
+
+    div.innerHTML = `
+      <a
+        href="${link}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        ${escapeHTML(
+          item.title ||
+          "Video"
+        )}
+      </a>
+
+      ${
+        item.snippet
+          ? `<p>${escapeHTML(item.snippet)}</p>`
+          : ""
+      }
+
+      ${
+        item.channel
+          ? `<small>${escapeHTML(item.channel)}</small>`
+          : ""
+      }
+    `;
+
+    list.appendChild(div);
+  }
+
+  resultsEl.appendChild(list);
+}
+
+
+/* =========================================================
+   RELATED SEARCHES
+   ========================================================= */
+
+function renderRelated(data) {
+
+  if (
+    !Array.isArray(data.related_searches) ||
+    !data.related_searches.length
+  ) {
+    return;
+  }
+
+  const card = document.createElement("div");
+
+  card.className = "card related";
+
+  card.innerHTML = `<h3>Related searches</h3>`;
+
+  for (const item of data.related_searches) {
+
+    const query =
+      typeof item === "string"
+        ? item
+        : item.query || "";
+
+    if (!query) continue;
+
+    const button = document.createElement("a");
+
+    button.href = "#";
+
+    button.textContent = query;
+
+    button.addEventListener("click", event => {
+
+      event.preventDefault();
+
+      queryInput.value = query;
+
+      performSearch(query);
+    });
+
+    card.appendChild(button);
+  }
+
+  resultsEl.appendChild(card);
+}
+
+
+/* =========================================================
+   SYSTEM THEME AUTO-UPDATE
+   ========================================================= */
+
+const systemTheme =
+  window.matchMedia("(prefers-color-scheme: dark)");
+
+systemTheme.addEventListener("change", () => {
+
+  const selected =
+    localStorage.getItem("search-theme") ||
+    "system";
+
+  if (selected === "system") {
+    applyTheme("system");
   }
 });
 
-searchInput.addEventListener("input", () => {
-  suggestions.style.display = "none";
-});
 
-window.addEventListener("pageshow", () => {
-  searchInput.focus({ preventScroll: true });
-});
+/* =========================================================
+   START
+   ========================================================= */
+
+queryInput.focus();
+
 </script>
+
 </body>
 </html>
