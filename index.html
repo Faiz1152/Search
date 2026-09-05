@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="color-scheme" content="light dark">
+
 <title>Search</title>
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
 
 <style>
 * {
@@ -12,157 +14,233 @@
 }
 
 :root {
+  color-scheme: light dark;
   --bg: #ffffff;
-  --text: #202124;
-  --muted: #5f6368;
-  --border: #dadce0;
-  --card: #ffffff;
-  --hover: #f8f9fa;
-  --accent: #1a73e8;
-  --shadow: 0 2px 8px rgba(0,0,0,.08);
+  --surface: #f7f8fa;
+  --surface2: #ffffff;
+  --text: #171717;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --danger: #dc2626;
+  --shadow: 0 8px 30px rgba(0,0,0,.07);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #202124;
-    --text: #e8eaed;
-    --muted: #9aa0a6;
-    --border: #3c4043;
-    --card: #292a2d;
-    --hover: #303134;
-    --accent: #8ab4f8;
-    --shadow: 0 2px 8px rgba(0,0,0,.25);
-  }
+html.dark {
+  --bg: #101114;
+  --surface: #17181c;
+  --surface2: #1c1e23;
+  --text: #f4f4f5;
+  --muted: #a1a1aa;
+  --border: #2b2e35;
+  --accent: #60a5fa;
+  --accent-hover: #93c5fd;
+  --danger: #f87171;
+  --shadow: 0 8px 30px rgba(0,0,0,.3);
 }
 
-html[data-theme="light"] {
-  --bg: #ffffff;
-  --text: #202124;
-  --muted: #5f6368;
-  --border: #dadce0;
-  --card: #ffffff;
-  --hover: #f8f9fa;
-  --accent: #1a73e8;
+html.light {
+  color-scheme: light;
 }
 
-html[data-theme="dark"] {
-  --bg: #202124;
-  --text: #e8eaed;
-  --muted: #9aa0a6;
-  --border: #3c4043;
-  --card: #292a2d;
-  --hover: #303134;
-  --accent: #8ab4f8;
+html.dark {
+  color-scheme: dark;
 }
 
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
   background: var(--bg);
   color: var(--text);
-  transition: background .2s, color .2s;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
 }
 
-header {
-  padding: 22px 20px 10px;
-  text-align: center;
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.header {
+  width: 100%;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.theme-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.theme-box select {
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  border-radius: 9px;
+  padding: 7px 30px 7px 10px;
+  outline: none;
+}
+
+.hero {
+  min-height: 55vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  transition: min-height .25s ease;
+}
+
+body.has-results .hero {
+  min-height: auto;
+  padding-top: 55px;
+  padding-bottom: 25px;
 }
 
 .logo {
-  font-size: 44px;
-  margin-bottom: 12px;
+  font-size: 62px;
+  line-height: 1;
+  margin-bottom: 20px;
+  user-select: none;
 }
 
-.search-area {
-  width: min(760px, 94%);
-  margin: auto;
+.search-wrap {
+  width: min(720px, 94vw);
+  position: relative;
 }
 
 .search-box {
+  width: 100%;
+  height: 58px;
   display: flex;
   align-items: center;
+  background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 28px;
-  padding: 4px 8px 4px 16px;
-  background: var(--card);
+  border-radius: 30px;
   box-shadow: var(--shadow);
+  padding: 0 10px 0 20px;
+  transition: border-color .15s, box-shadow .15s;
 }
 
 .search-box:focus-within {
   border-color: var(--accent);
+  box-shadow: 0 8px 35px rgba(37,99,235,.12);
 }
 
-.search-box input {
+.search-icon {
+  font-size: 20px;
+  margin-right: 11px;
+  opacity: .65;
+}
+
+#query {
   flex: 1;
   border: 0;
   outline: 0;
   background: transparent;
   color: var(--text);
   font-size: 17px;
-  padding: 12px 8px;
+  min-width: 0;
+}
+
+#query::placeholder {
+  color: var(--muted);
 }
 
 .search-button {
+  width: 42px;
+  height: 42px;
   border: 0;
-  background: transparent;
-  color: var(--muted);
-  font-size: 22px;
-  cursor: pointer;
-  padding: 8px 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-size: 19px;
+  display: grid;
+  place-items: center;
+  transition: transform .15s, background .15s;
 }
 
 .search-button:hover {
-  color: var(--accent);
+  background: var(--accent-hover);
+  transform: scale(1.04);
 }
 
-.controls {
-  width: min(900px, 94%);
-  margin: 20px auto 0;
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  flex-wrap: wrap;
+.search-button:disabled {
+  opacity: .6;
+  cursor: default;
+  transform: none;
 }
 
-.tab {
-  border: 1px solid var(--border);
-  background: var(--card);
-  color: var(--text);
-  border-radius: 20px;
-  padding: 8px 16px;
-  cursor: pointer;
-}
-
-.tab.active,
-.tab:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.settings {
-  width: min(900px, 94%);
-  margin: 12px auto;
-  text-align: right;
-}
-
-.settings select {
-  background: var(--card);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 7px 10px;
-}
-
-#status {
-  width: min(900px, 94%);
-  margin: 20px auto;
+.hint {
+  margin-top: 13px;
+  font-size: 13px;
   color: var(--muted);
   text-align: center;
 }
 
-#results {
-  width: min(900px, 94%);
-  margin: 0 auto 60px;
+.results-area {
+  width: min(1000px, 94vw);
+  margin: 0 auto 70px;
+}
+
+.status {
+  text-align: center;
+  padding: 25px;
+  color: var(--muted);
+}
+
+.error {
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--border));
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface2));
+  color: var(--danger);
+  padding: 16px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 25px;
+  scrollbar-width: thin;
+}
+
+.tab {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 11px 16px;
+  border-bottom: 2px solid transparent;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
 }
 
 .result {
@@ -171,161 +249,237 @@ header {
 }
 
 .result-url {
-  color: var(--muted);
+  color: #15803d;
   font-size: 13px;
-  overflow-wrap: anywhere;
+  word-break: break-all;
+  margin-bottom: 5px;
 }
 
-.result h2 {
-  margin: 5px 0;
-  font-size: 21px;
-  font-weight: 500;
+html.dark .result-url {
+  color: #86efac;
 }
 
-.result h2 a {
+.result-title {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.result-title a {
   color: var(--accent);
   text-decoration: none;
 }
 
-.result h2 a:hover {
+.result-title a:hover {
   text-decoration: underline;
 }
 
-.result p {
-  margin: 6px 0;
-  line-height: 1.5;
+.result-description {
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: 14px;
 }
 
-.date {
+.result-date {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
+  margin-top: 7px;
 }
 
 .card {
-  background: var(--card);
+  background: var(--surface2);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px;
-  margin: 18px 0;
-  box-shadow: var(--shadow);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 3px 15px rgba(0,0,0,.025);
 }
 
-.card h3 {
-  margin-top: 0;
+.card-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 
 .answer {
-  font-size: 20px;
-  line-height: 1.5;
+  line-height: 1.65;
 }
 
-.knowledge-title {
-  font-size: 24px;
-  margin-bottom: 8px;
+.answer-source {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.answer-source a {
+  color: var(--accent);
+}
+
+.kg-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.kg-subtitle {
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.kg-description {
+  line-height: 1.6;
 }
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
 }
 
-.feature-card {
-  background: var(--card);
+.feature-item {
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 15px;
+  padding: 12px;
 }
 
-.feature-card h3 {
-  margin-top: 0;
+.feature-label {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 5px;
 }
 
-.images-grid {
+.feature-value {
+  font-weight: 600;
+}
+
+.media-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 14px;
 }
 
-.image-card {
+.media-card {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  background: var(--card);
+  background: var(--surface);
 }
 
-.image-card img {
+.media-card img {
   width: 100%;
   height: 150px;
   object-fit: cover;
   display: block;
 }
 
-.image-card div {
-  padding: 10px;
+.media-info {
+  padding: 11px;
+}
+
+.media-info a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
   font-size: 14px;
 }
 
-.video-list {
-  display: grid;
-  gap: 12px;
+.media-info a:hover {
+  color: var(--accent);
 }
 
-.video-item {
-  padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
+.news-item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
 }
 
-.video-item a {
+.news-item:last-child {
+  border-bottom: 0;
+}
+
+.news-item a {
   color: var(--accent);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 650;
 }
 
-.map-list {
-  display: grid;
-  gap: 10px;
+.news-source {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 5px;
 }
 
-.map-place {
-  padding: 13px;
+.related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.related button {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 20px;
+  padding: 8px 13px;
 }
 
-.map-place a {
+.related button:hover {
+  border-color: var(--accent);
   color: var(--accent);
-}
-
-.related a {
-  display: block;
-  padding: 8px 0;
-  color: var(--accent);
-  text-decoration: none;
 }
 
 .loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
   padding: 35px;
+  color: var(--muted);
+}
+
+.spinner {
+  width: 19px;
+  height: 19px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.footer {
   text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 25px;
 }
 
-.error {
-  color: #d93025;
-}
-
-pre {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+.hidden {
+  display: none !important;
 }
 
 @media (max-width: 600px) {
-  .logo {
-    font-size: 36px;
+  .header {
+    padding: 13px 15px;
   }
 
-  .result h2 {
+  .logo {
+    font-size: 54px;
+  }
+
+  .search-box {
+    height: 54px;
+  }
+
+  .result-title {
     font-size: 18px;
+  }
+
+  body.has-results .hero {
+    padding-top: 25px;
   }
 }
 </style>
@@ -333,71 +487,109 @@ pre {
 
 <body>
 
-<header>
-  <div class="logo">🔍</div>
-
-  <div class="search-area">
-    <form class="search-box" id="searchForm">
-      <input
-        id="query"
-        type="search"
-        placeholder="Search the web"
-        autocomplete="off"
-        spellcheck="false"
-        required
-      >
-      <button class="search-button" type="submit" aria-label="Search">🔍</button>
-    </form>
-  </div>
-</header>
-
-<div class="controls">
-  <button class="tab active" data-type="web">Web</button>
-  <button class="tab" data-type="images">Images</button>
-  <button class="tab" data-type="news">News</button>
-  <button class="tab" data-type="videos">Videos</button>
-</div>
-
-<div class="settings">
-  <label>
-    Theme:
-    <select id="theme">
+<header class="header">
+  <div class="theme-box">
+    <span>Theme</span>
+    <select id="themeSelect" aria-label="Theme">
       <option value="system">System</option>
       <option value="light">Light</option>
       <option value="dark">Dark</option>
     </select>
-  </label>
-</div>
+  </div>
+</header>
 
-<div id="status"></div>
-<main id="results"></main>
+<main>
+
+<section class="hero">
+  <div class="logo">🔍</div>
+
+  <form class="search-wrap" id="searchForm">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+
+      <input
+        id="query"
+        type="search"
+        autocomplete="off"
+        spellcheck="false"
+        placeholder="Search the web..."
+        aria-label="Search"
+      >
+
+      <button
+        id="searchButton"
+        class="search-button"
+        type="submit"
+        aria-label="Search"
+      >➜</button>
+    </div>
+
+    <div class="hint">
+      Press Enter to search
+    </div>
+  </form>
+</section>
+
+<section class="results-area">
+
+  <div id="status"></div>
+
+  <div id="tabs" class="tabs hidden"></div>
+
+  <div id="content"></div>
+
+</section>
+
+</main>
+
+<footer class="footer">
+  Search
+</footer>
 
 <script>
-/* =========================================================
-   API KEY
-   ========================================================= */
+/*
+==========================================================
+SEARCHAPI KEY
+==========================================================
+
+Replace ONLY the text between the quotation marks.
+
+Example:
+
+const API_KEY = "your-real-searchapi-key";
+
+Do NOT change the variable name.
+==========================================================
+*/
 
 const API_KEY = "ezGeMU9TnuXNnmytZSSScsbL";
 
+const API_URL = "https://www.searchapi.io/api/v1/search";
 
-/* =========================================================
-   API
-   ========================================================= */
+const queryInput = document.getElementById("query");
+const searchForm = document.getElementById("searchForm");
+const searchButton = document.getElementById("searchButton");
+const statusBox = document.getElementById("status");
+const tabsBox = document.getElementById("tabs");
+const contentBox = document.getElementById("content");
+const themeSelect = document.getElementById("themeSelect");
 
-const API_URL = "https://serpapi.com/search";
+let currentData = null;
+let currentTab = "web";
 
-
-/* =========================================================
-   THEME
-   ========================================================= */
-
-const themeSelect = document.getElementById("theme");
+const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
 function applyTheme(theme) {
-  if (theme === "system") {
-    document.documentElement.removeAttribute("data-theme");
+  document.documentElement.classList.remove("light", "dark");
+
+  if (theme === "dark") {
+    document.documentElement.classList.add("dark");
+  } else if (theme === "light") {
+    document.documentElement.classList.add("light");
   } else {
-    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.classList.add(
+      mediaQuery.matches ? "dark" : "light"
+    );
   }
 }
 
@@ -406,6 +598,12 @@ const savedTheme = localStorage.getItem("search-theme") || "system";
 themeSelect.value = savedTheme;
 applyTheme(savedTheme);
 
+mediaQuery.addEventListener("change", () => {
+  if (themeSelect.value === "system") {
+    applyTheme("system");
+  }
+});
+
 themeSelect.addEventListener("change", () => {
   const theme = themeSelect.value;
 
@@ -413,57 +611,18 @@ themeSelect.addEventListener("change", () => {
   applyTheme(theme);
 });
 
-
-/* =========================================================
-   ELEMENTS
-   ========================================================= */
-
-const form = document.getElementById("searchForm");
-const queryInput = document.getElementById("query");
-const resultsEl = document.getElementById("results");
-const statusEl = document.getElementById("status");
-
-let currentType = "web";
-let lastData = null;
-let lastQuery = "";
-
-
-/* =========================================================
-   TABS
-   ========================================================= */
-
-document.querySelectorAll(".tab").forEach(button => {
-  button.addEventListener("click", () => {
-
-    document.querySelectorAll(".tab").forEach(b => {
-      b.classList.remove("active");
-    });
-
-    button.classList.add("active");
-
-    currentType = button.dataset.type;
-
-    if (lastData) {
-      renderData(lastData, currentType);
-    }
-  });
-});
-
-
-/* =========================================================
-   SECURITY HELPERS
-   ========================================================= */
-
 function escapeHTML(value) {
   return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function safeURL(value) {
+  if (!value) return "#";
+
   try {
     const url = new URL(value);
 
@@ -473,898 +632,932 @@ function safeURL(value) {
     ) {
       return url.href;
     }
+  } catch (_) {}
 
-    return "#";
-  } catch {
-    return "#";
+  return "#";
+}
+
+function domainFromURL(value) {
+  try {
+    return new URL(value).hostname;
+  } catch (_) {
+    return "";
   }
 }
 
+function textValue(value) {
+  if (typeof value === "string") return value;
 
-/* =========================================================
-   SEARCH
-   ========================================================= */
+  if (typeof value === "number") {
+    return String(value);
+  }
 
-form.addEventListener("submit", event => {
-  event.preventDefault();
+  if (value && typeof value === "object") {
+    if (value.text) return String(value.text);
+    if (value.answer) return String(value.answer);
+    if (value.title) return String(value.title);
+  }
 
-  const query = queryInput.value.trim();
+  return "";
+}
 
-  if (!query) return;
-
-  performSearch(query);
-});
-
-
-async function performSearch(query) {
-
-  lastQuery = query;
-
-  resultsEl.innerHTML = `
+function showLoading() {
+  statusBox.innerHTML = `
     <div class="loading">
-      Searching…
+      <span class="spinner"></span>
+      <span>Searching...</span>
     </div>
   `;
 
-  statusEl.textContent = "";
+  contentBox.innerHTML = "";
+  tabsBox.classList.add("hidden");
+}
+
+function showError(message) {
+  statusBox.innerHTML = `
+    <div class="error">
+      <strong>Search failed</strong>
+      <div style="margin-top:6px">${escapeHTML(message)}</div>
+    </div>
+  `;
+
+  tabsBox.classList.add("hidden");
+  contentBox.innerHTML = "";
+}
+
+function clearStatus() {
+  statusBox.innerHTML = "";
+}
+
+function createTabs(data) {
+  const tabs = [
+    ["web", "Web"],
+    ["images", "Images"],
+    ["news", "News"],
+    ["videos", "Videos"]
+  ];
+
+  const available = [];
+
+  if (Array.isArray(data.organic_results)) {
+    available.push("web");
+  }
+
+  if (Array.isArray(data.images)) {
+    available.push("images");
+  }
+
+  if (
+    Array.isArray(data.video_results) ||
+    Array.isArray(data.videos)
+  ) {
+    available.push("videos");
+  }
+
+  if (
+    Array.isArray(data.news_results) ||
+    Array.isArray(data.top_stories)
+  ) {
+    available.push("news");
+  }
+
+  if (!available.length) {
+    tabsBox.classList.add("hidden");
+    return;
+  }
+
+  tabsBox.classList.remove("hidden");
+
+  tabsBox.innerHTML = tabs
+    .filter(([id]) => available.includes(id))
+    .map(([id, label]) => `
+      <button
+        class="tab ${currentTab === id ? "active" : ""}"
+        data-tab="${id}"
+      >
+        ${label}
+      </button>
+    `)
+    .join("");
+
+  tabsBox.querySelectorAll(".tab").forEach(button => {
+    button.addEventListener("click", () => {
+      currentTab = button.dataset.tab;
+
+      tabsBox
+        .querySelectorAll(".tab")
+        .forEach(tab => tab.classList.remove("active"));
+
+      button.classList.add("active");
+
+      renderCurrentTab();
+    });
+  });
+}
+
+function renderAnswerBox(data) {
+  const answer = data.answer_box;
+
+  if (!answer) return "";
+
+  const title =
+    answer.title ||
+    answer.type ||
+    "Answer";
+
+  const answerText =
+    answer.answer ||
+    answer.snippet ||
+    answer.result ||
+    "";
+
+  if (!answerText && !answer.title) return "";
+
+  let source = "";
+
+  if (answer.link) {
+    source = `
+      <div class="answer-source">
+        <a
+          href="${safeURL(answer.link)}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ${escapeHTML(
+            answer.source ||
+            domainFromURL(answer.link) ||
+            "Source"
+          )}
+        </a>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">
+        ${escapeHTML(title)}
+      </div>
+
+      <div class="answer">
+        ${escapeHTML(answerText)}
+      </div>
+
+      ${source}
+    </div>
+  `;
+}
+
+function renderKnowledgeGraph(data) {
+  const kg = data.knowledge_graph;
+
+  if (!kg) return "";
+
+  const title = kg.title || kg.name;
+
+  const description =
+    kg.description ||
+    kg.description_source ||
+    "";
+
+  if (!title && !description) return "";
+
+  return `
+    <div class="card">
+      ${
+        title
+          ? `<div class="kg-title">${escapeHTML(title)}</div>`
+          : ""
+      }
+
+      ${
+        kg.type
+          ? `<div class="kg-subtitle">${escapeHTML(kg.type)}</div>`
+          : ""
+      }
+
+      ${
+        description
+          ? `<div class="kg-description">${escapeHTML(description)}</div>`
+          : ""
+      }
+
+      ${
+        kg.website
+          ? `
+            <div class="answer-source">
+              <a
+                href="${safeURL(kg.website)}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Official website
+              </a>
+            </div>
+          `
+          : ""
+      }
+    </div>
+  `;
+}
+
+function renderCalculator(data) {
+  if (data.calculator_result === undefined) {
+    return "";
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">Calculator</div>
+
+      <div style="font-size:28px;font-weight:700;">
+        ${escapeHTML(textValue(data.calculator_result))}
+      </div>
+    </div>
+  `;
+}
+
+function renderWeather(data) {
+  const weather = data.weather_result;
+
+  if (!weather) return "";
+
+  const fields = [];
+
+  if (weather.temperature !== undefined) {
+    fields.push(["Temperature", weather.temperature]);
+  }
+
+  if (weather.weather) {
+    fields.push(["Condition", weather.weather]);
+  }
+
+  if (weather.precipitation !== undefined) {
+    fields.push(["Precipitation", weather.precipitation]);
+  }
+
+  if (weather.humidity !== undefined) {
+    fields.push(["Humidity", weather.humidity]);
+  }
+
+  if (weather.wind !== undefined) {
+    fields.push(["Wind", weather.wind]);
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">
+        ${escapeHTML(weather.location || "Weather")}
+      </div>
+
+      ${
+        fields.length
+          ? `
+            <div class="feature-grid">
+              ${fields.map(([name, value]) => `
+                <div class="feature-item">
+                  <div class="feature-label">
+                    ${escapeHTML(name)}
+                  </div>
+                  <div class="feature-value">
+                    ${escapeHTML(value)}
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          `
+          : `
+            <div class="answer">
+              ${escapeHTML(JSON.stringify(weather))}
+            </div>
+          `
+      }
+    </div>
+  `;
+}
+
+function renderFinance(data) {
+  const finance =
+    data.finance_results ||
+    (
+      data.answer_box &&
+      data.answer_box.type === "finance_results"
+        ? data.answer_box
+        : null
+    );
+
+  if (!finance) return "";
+
+  const fields = [];
+
+  if (finance.price !== undefined) {
+    fields.push(["Price", finance.price]);
+  }
+
+  if (finance.currency) {
+    fields.push(["Currency", finance.currency]);
+  }
+
+  if (finance.exchange) {
+    fields.push(["Exchange", finance.exchange]);
+  }
+
+  if (finance.previous_close !== undefined) {
+    fields.push(["Previous close", finance.previous_close]);
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">
+        ${escapeHTML(
+          finance.title ||
+          finance.stock ||
+          "Finance"
+        )}
+      </div>
+
+      ${
+        fields.length
+          ? `
+            <div class="feature-grid">
+              ${fields.map(([name, value]) => `
+                <div class="feature-item">
+                  <div class="feature-label">
+                    ${escapeHTML(name)}
+                  </div>
+                  <div class="feature-value">
+                    ${escapeHTML(value)}
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          `
+          : ""
+      }
+
+      ${
+        finance.price_change
+          ? `
+            <div style="margin-top:14px;">
+              Change:
+              ${escapeHTML(
+                finance.price_change.amount ??
+                ""
+              )}
+              ${
+                finance.price_change.percentage !== undefined
+                  ? ` (${escapeHTML(finance.price_change.percentage)}%)`
+                  : ""
+              }
+            </div>
+          `
+          : ""
+      }
+    </div>
+  `;
+}
+
+function renderLocal(data) {
+  const local =
+    data.local_results ||
+    data.places ||
+    [];
+
+  if (!Array.isArray(local) || !local.length) {
+    return "";
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">Places</div>
+
+      ${local.slice(0, 8).map(place => {
+        const name =
+          place.title ||
+          place.name ||
+          "Place";
+
+        const address =
+          place.address ||
+          place.location ||
+          "";
+
+        const link =
+          place.link ||
+          place.website ||
+          "";
+
+        return `
+          <div class="news-item">
+            ${
+              link
+                ? `
+                  <a
+                    href="${safeURL(link)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    ${escapeHTML(name)}
+                  </a>
+                `
+                : `
+                  <strong>${escapeHTML(name)}</strong>
+                `
+            }
+
+            ${
+              address
+                ? `
+                  <div class="news-source">
+                    ${escapeHTML(address)}
+                  </div>
+                `
+                : ""
+            }
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderRelated(data) {
+  const related = data.related_searches;
+
+  if (!Array.isArray(related) || !related.length) {
+    return "";
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">Related searches</div>
+
+      <div class="related">
+        ${related.slice(0, 12).map(item => {
+          const query =
+            typeof item === "string"
+              ? item
+              : item.query || item.title || "";
+
+          if (!query) return "";
+
+          return `
+            <button
+              type="button"
+              data-related="${escapeHTML(query)}"
+            >
+              ${escapeHTML(query)}
+            </button>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderWeb(data) {
+  let html = "";
+
+  html += renderAnswerBox(data);
+  html += renderKnowledgeGraph(data);
+  html += renderCalculator(data);
+  html += renderWeather(data);
+  html += renderFinance(data);
+  html += renderLocal(data);
+
+  const results = Array.isArray(data.organic_results)
+    ? data.organic_results
+    : [];
+
+  if (!results.length) {
+    html += `
+      <div class="status">
+        No web results were returned.
+      </div>
+    `;
+  } else {
+    html += results.map(item => {
+      const url = safeURL(
+        item.link ||
+        item.url ||
+        ""
+      );
+
+      const title =
+        item.title ||
+        "Untitled result";
+
+      const description =
+        item.snippet ||
+        item.description ||
+        "";
+
+      const displayUrl =
+        item.displayed_link ||
+        item.source ||
+        item.link ||
+        "";
+
+      return `
+        <article class="result">
+          <div class="result-url">
+            ${escapeHTML(displayUrl)}
+          </div>
+
+          <h2 class="result-title">
+            <a
+              href="${url}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ${escapeHTML(title)}
+            </a>
+          </h2>
+
+          ${
+            description
+              ? `
+                <div class="result-description">
+                  ${escapeHTML(description)}
+                </div>
+              `
+              : ""
+          }
+
+          ${
+            item.date
+              ? `
+                <div class="result-date">
+                  ${escapeHTML(item.date)}
+                </div>
+              `
+              : ""
+          }
+        </article>
+      `;
+    }).join("");
+  }
+
+  html += renderRelated(data);
+
+  return html;
+}
+
+function renderImages(data) {
+  const images = Array.isArray(data.images)
+    ? data.images
+    : Array.isArray(data.images_results)
+      ? data.images_results
+      : [];
+
+  if (!images.length) {
+    return `
+      <div class="status">
+        No image results were returned.
+      </div>
+    `;
+  }
+
+  return `
+    <div class="media-grid">
+      ${images.map(item => {
+        const image =
+          item.original?.link ||
+          item.original ||
+          item.thumbnail ||
+          item.link ||
+          "";
+
+        const link =
+          item.link ||
+          item.original?.link ||
+          "#";
+
+        const title =
+          item.title ||
+          item.source?.name ||
+          "Image";
+
+        if (!image) return "";
+
+        return `
+          <article class="media-card">
+            <a
+              href="${safeURL(link)}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="${safeURL(image)}"
+                alt="${escapeHTML(title)}"
+                loading="lazy"
+                onerror="this.style.display='none'"
+              >
+            </a>
+
+            <div class="media-info">
+              <a
+                href="${safeURL(link)}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                ${escapeHTML(title)}
+              </a>
+            </div>
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderNews(data) {
+  const news = Array.isArray(data.news_results)
+    ? data.news_results
+    : Array.isArray(data.top_stories)
+      ? data.top_stories
+      : [];
+
+  if (!news.length) {
+    return `
+      <div class="status">
+        No news results were returned.
+      </div>
+    `;
+  }
+
+  return `
+    <div class="card">
+      ${news.map(item => {
+        const title =
+          item.title ||
+          "News result";
+
+        const link =
+          item.link ||
+          item.url ||
+          "#";
+
+        const source =
+          item.source?.name ||
+          item.source ||
+          "";
+
+        const date =
+          item.date ||
+          "";
+
+        const snippet =
+          item.snippet ||
+          item.description ||
+          "";
+
+        return `
+          <article class="news-item">
+            <a
+              href="${safeURL(link)}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ${escapeHTML(title)}
+            </a>
+
+            ${
+              snippet
+                ? `
+                  <div class="result-description" style="margin-top:6px;">
+                    ${escapeHTML(snippet)}
+                  </div>
+                `
+                : ""
+            }
+
+            <div class="news-source">
+              ${escapeHTML(source)}
+              ${source && date ? " • " : ""}
+              ${escapeHTML(date)}
+            </div>
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderVideos(data) {
+  const videos =
+    Array.isArray(data.video_results)
+      ? data.video_results
+      : Array.isArray(data.videos)
+        ? data.videos
+        : [];
+
+  if (!videos.length) {
+    return `
+      <div class="status">
+        No video results were returned.
+      </div>
+    `;
+  }
+
+  return `
+    <div class="card">
+      ${videos.map(item => {
+        const title =
+          item.title ||
+          "Video";
+
+        const link =
+          item.link ||
+          item.url ||
+          "#";
+
+        const source =
+          item.source ||
+          item.channel ||
+          "";
+
+        return `
+          <article class="news-item">
+            <a
+              href="${safeURL(link)}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ${escapeHTML(title)}
+            </a>
+
+            ${
+              source
+                ? `
+                  <div class="news-source">
+                    ${escapeHTML(source)}
+                  </div>
+                `
+                : ""
+            }
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderCurrentTab() {
+  if (!currentData) return;
+
+  if (currentTab === "images") {
+    contentBox.innerHTML = renderImages(currentData);
+    return;
+  }
+
+  if (currentTab === "news") {
+    contentBox.innerHTML = renderNews(currentData);
+    return;
+  }
+
+  if (currentTab === "videos") {
+    contentBox.innerHTML = renderVideos(currentData);
+    return;
+  }
+
+  contentBox.innerHTML = renderWeb(currentData);
+
+  document
+    .querySelectorAll("[data-related]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        queryInput.value =
+          button.dataset.related;
+
+        performSearch();
+      });
+    });
+}
+
+async function performSearch() {
+  const query = queryInput.value.trim();
+
+  if (!query) {
+    queryInput.focus();
+    return;
+  }
+
+  if (!API_KEY || API_KEY === "YOUR_SEARCHAPI_KEY_HERE") {
+    showError(
+      "Add your SearchApi API key in the API_KEY line first."
+    );
+    return;
+  }
+
+  document.body.classList.add("has-results");
+
+  searchButton.disabled = true;
+
+  showLoading();
+
+  currentTab = "web";
 
   try {
-
     const params = new URLSearchParams();
 
     params.set("engine", "google");
     params.set("q", query);
-    params.set("google_domain", "google.com");
+
+    params.set("api_key", API_KEY);
+
     params.set("hl", "en");
     params.set("gl", "us");
 
     /*
-      100 means "request up to 100".
-      SerpApi decides how many Google results are actually available.
-      This remains ONE API request.
+      Ask SearchApi to resolve Google redirect links
+      when possible.
     */
-    params.set("num", "100");
-
-    params.set("api_key", API_KEY);
+    params.set("link", "resolved");
 
     const response = await fetch(
       API_URL + "?" + params.toString(),
       {
         method: "GET",
-        cache: "no-store"
+        headers: {
+          "Accept": "application/json"
+        }
       }
     );
-
-    const text = await response.text();
 
     let data;
 
     try {
-      data = JSON.parse(text);
-    } catch {
+      data = await response.json();
+    } catch (_) {
       throw new Error(
-        "The API returned an invalid response."
+        "SearchApi returned an invalid response."
       );
     }
 
-    if (!response.ok || data.error) {
+    if (!response.ok) {
       throw new Error(
         data.error ||
-        "The search API returned an error."
+        data.message ||
+        `SearchApi returned HTTP ${response.status}.`
       );
     }
 
-    lastData = data;
+    if (data.error) {
+      throw new Error(
+        data.error
+      );
+    }
 
-    renderData(data, currentType);
+    currentData = data;
+
+    clearStatus();
+
+    createTabs(data);
+
+    renderCurrentTab();
 
   } catch (error) {
 
-    console.error(error);
+    let message = error?.message ||
+      "Unable to complete the search.";
 
-    resultsEl.innerHTML = `
-      <div class="card error">
-        <h3>Search failed</h3>
-        <p>${escapeHTML(error.message)}</p>
-        <p>
-          If this page is being opened directly as a
-          <code>file://</code> file, open it through an HTTPS
-          website instead.
-        </p>
-      </div>
-    `;
-
-    statusEl.textContent = "";
-  }
-}
-
-
-/* =========================================================
-   MAIN RENDERER
-   ========================================================= */
-
-function renderData(data, type) {
-
-  resultsEl.innerHTML = "";
-
-  if (type === "images") {
-    renderImages(data);
-    return;
-  }
-
-  if (type === "news") {
-    renderNews(data);
-    return;
-  }
-
-  if (type === "videos") {
-    renderVideos(data);
-    return;
-  }
-
-  renderWeb(data);
-}
-
-
-/* =========================================================
-   WEB
-   ========================================================= */
-
-function renderWeb(data) {
-
-  const featureContainer = document.createElement("div");
-
-  renderSpecialFeatures(data, featureContainer);
-
-  resultsEl.appendChild(featureContainer);
-
-  const results =
-    Array.isArray(data.organic_results)
-      ? data.organic_results
-      : [];
-
-  if (!results.length) {
-
-    if (!featureContainer.innerHTML) {
-      resultsEl.innerHTML = `
-        <div class="card">
-          No web results were returned.
-        </div>
-      `;
+    if (
+      message.toLowerCase().includes("failed to fetch")
+    ) {
+      message =
+        "The browser could not connect to SearchApi. " +
+        "If this happens while opening the HTML as a file, " +
+        "host the file on HTTPS (for example GitHub Pages). " +
+        "This page does not use SerpApi or your WebSearch backend.";
     }
 
-    return;
-  }
+    showError(message);
 
-  const heading = document.createElement("div");
-
-  heading.innerHTML = `
-    <p style="color:var(--muted)">
-      Web results for
-      <strong>${escapeHTML(lastQuery)}</strong>
-    </p>
-  `;
-
-  resultsEl.appendChild(heading);
-
-  for (const item of results) {
-
-    const link = safeURL(item.link);
-
-    const div = document.createElement("article");
-
-    div.className = "result";
-
-    div.innerHTML = `
-      <div class="result-url">
-        ${escapeHTML(item.displayed_link || item.link || "")}
-      </div>
-
-      <h2>
-        <a href="${link}" target="_blank" rel="noopener noreferrer">
-          ${escapeHTML(item.title || "Untitled")}
-        </a>
-      </h2>
-
-      <p>
-        ${escapeHTML(item.snippet || "")}
-      </p>
-
-      ${
-        item.date
-          ? `<div class="date">${escapeHTML(item.date)}</div>`
-          : ""
-      }
-    `;
-
-    resultsEl.appendChild(div);
-  }
-
-  renderRelated(data);
-}
-
-
-/* =========================================================
-   SPECIAL FEATURES
-   ========================================================= */
-
-function renderSpecialFeatures(data, container) {
-
-  let added = false;
-
-  /* Answer box */
-
-  if (data.answer_box) {
-
-    const box = data.answer_box;
-
-    let answer =
-      box.answer ||
-      box.snippet ||
-      box.result ||
-      "";
-
-    if (answer) {
-
-      const card = document.createElement("div");
-
-      card.className = "card";
-
-      card.innerHTML = `
-        <h3>Answer</h3>
-        <div class="answer">
-          ${escapeHTML(answer)}
-        </div>
-      `;
-
-      container.appendChild(card);
-
-      added = true;
-    }
-  }
-
-
-  /* Knowledge graph */
-
-  if (data.knowledge_graph) {
-
-    const kg = data.knowledge_graph;
-
-    const title =
-      kg.title ||
-      kg.name ||
-      "";
-
-    const description =
-      kg.description ||
-      kg.type ||
-      "";
-
-    if (title || description) {
-
-      const card = document.createElement("div");
-
-      card.className = "card";
-
-      card.innerHTML = `
-        <div class="knowledge-title">
-          ${escapeHTML(title)}
-        </div>
-
-        ${
-          description
-            ? `<p>${escapeHTML(description)}</p>`
-            : ""
-        }
-
-        ${
-          kg.website
-            ? `
-              <p>
-                <a
-                  href="${safeURL(kg.website)}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Official website
-                </a>
-              </p>
-            `
-            : ""
-        }
-      `;
-
-      container.appendChild(card);
-
-      added = true;
-    }
-  }
-
-
-  /* Calculator */
-
-  if (data.calculator_result) {
-
-    const value =
-      typeof data.calculator_result === "object"
-        ? data.calculator_result.result
-        : data.calculator_result;
-
-    if (value !== undefined && value !== null) {
-
-      const card = document.createElement("div");
-
-      card.className = "card";
-
-      card.innerHTML = `
-        <h3>Calculator</h3>
-        <div class="answer">
-          ${escapeHTML(value)}
-        </div>
-      `;
-
-      container.appendChild(card);
-
-      added = true;
-    }
-  }
-
-
-  /* Weather */
-
-  if (data.weather_result) {
-
-    const weather = data.weather_result;
-
-    const card = document.createElement("div");
-
-    card.className = "card";
-
-    card.innerHTML = `
-      <h3>Weather</h3>
-
-      <div class="feature-grid">
-
-        ${
-          weather.temperature !== undefined
-            ? `
-              <div class="feature-card">
-                <strong>Temperature</strong>
-                <div>
-                  ${escapeHTML(weather.temperature)}
-                  ${escapeHTML(weather.unit || "")}
-                </div>
-              </div>
-            `
-            : ""
-        }
-
-        ${
-          weather.condition
-            ? `
-              <div class="feature-card">
-                <strong>Condition</strong>
-                <div>${escapeHTML(weather.condition)}</div>
-              </div>
-            `
-            : ""
-        }
-
-        ${
-          weather.location
-            ? `
-              <div class="feature-card">
-                <strong>Location</strong>
-                <div>${escapeHTML(weather.location)}</div>
-              </div>
-            `
-            : ""
-        }
-
-      </div>
-    `;
-
-    container.appendChild(card);
-
-    added = true;
-  }
-
-
-  /* Finance */
-
-  if (Array.isArray(data.finance_results) &&
-      data.finance_results.length) {
-
-    const card = document.createElement("div");
-
-    card.className = "card";
-
-    card.innerHTML = `<h3>Finance</h3>`;
-
-    const grid = document.createElement("div");
-
-    grid.className = "feature-grid";
-
-    for (const item of data.finance_results) {
-
-      const symbol =
-        item.symbol ||
-        item.ticker ||
-        "";
-
-      const name =
-        item.name ||
-        item.title ||
-        "";
-
-      const price =
-        item.price ??
-        item.price_text ??
-        "";
-
-      const change =
-        item.change ??
-        item.change_percentage ??
-        "";
-
-      const box = document.createElement("div");
-
-      box.className = "feature-card";
-
-      box.innerHTML = `
-        <h3>${escapeHTML(name || symbol)}</h3>
-
-        ${
-          price !== ""
-            ? `<div class="answer">${escapeHTML(price)}</div>`
-            : ""
-        }
-
-        ${
-          change !== ""
-            ? `<p>${escapeHTML(change)}</p>`
-            : ""
-        }
-      `;
-
-      grid.appendChild(box);
-    }
-
-    card.appendChild(grid);
-    container.appendChild(card);
-
-    added = true;
-  }
-
-
-  /* Local results / maps */
-
-  if (Array.isArray(data.local_results) &&
-      data.local_results.length) {
-
-    const card = document.createElement("div");
-
-    card.className = "card";
-
-    card.innerHTML = `<h3>Places</h3>`;
-
-    const list = document.createElement("div");
-
-    list.className = "map-list";
-
-    for (const place of data.local_results) {
-
-      const name =
-        place.title ||
-        place.name ||
-        "Place";
-
-      const address =
-        place.address ||
-        "";
-
-      let mapsURL = "";
-
-      if (
-        typeof place.gps_coordinates === "object" &&
-        place.gps_coordinates
-      ) {
-
-        const lat = place.gps_coordinates.latitude;
-        const lon = place.gps_coordinates.longitude;
-
-        if (
-          typeof lat === "number" &&
-          typeof lon === "number"
-        ) {
-          mapsURL =
-            "https://www.google.com/maps/search/?api=1&query=" +
-            encodeURIComponent(lat + "," + lon);
-        }
-      }
-
-      if (!mapsURL) {
-
-        mapsURL =
-          "https://www.google.com/maps/search/?api=1&query=" +
-          encodeURIComponent(
-            name + " " + address
-          );
-      }
-
-      const item = document.createElement("div");
-
-      item.className = "map-place";
-
-      item.innerHTML = `
-        <strong>${escapeHTML(name)}</strong>
-
-        ${
-          address
-            ? `<div>${escapeHTML(address)}</div>`
-            : ""
-        }
-
-        <div style="margin-top:8px">
-          <a
-            href="${safeURL(mapsURL)}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Open in Maps
-          </a>
-        </div>
-      `;
-
-      list.appendChild(item);
-    }
-
-    card.appendChild(list);
-    container.appendChild(card);
-
-    added = true;
-  }
-
-  return added;
-}
-
-
-/* =========================================================
-   IMAGES
-   ========================================================= */
-
-function renderImages(data) {
-
-  const images =
-    Array.isArray(data.images_results)
-      ? data.images_results
-      : [];
-
-  if (!images.length) {
-
-    resultsEl.innerHTML = `
-      <div class="card">
-        No image results were returned.
-      </div>
-    `;
-
-    return;
-  }
-
-  const heading = document.createElement("div");
-
-  heading.innerHTML = `
-    <p style="color:var(--muted)">
-      Images for
-      <strong>${escapeHTML(lastQuery)}</strong>
-    </p>
-  `;
-
-  resultsEl.appendChild(heading);
-
-  const grid = document.createElement("div");
-
-  grid.className = "images-grid";
-
-  for (const image of images) {
-
-    const imageURL =
-      safeURL(
-        image.original ||
-        image.thumbnail ||
-        ""
-      );
-
-    const sourceURL =
-      safeURL(
-        image.link ||
-        image.source ||
-        ""
-      );
-
-    if (imageURL === "#") continue;
-
-    const card = document.createElement("div");
-
-    card.className = "image-card";
-
-    card.innerHTML = `
-      <a
-        href="${imageURL}"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <img
-          src="${imageURL}"
-          loading="lazy"
-          alt="${escapeHTML(image.title || "")}"
-          onerror="this.parentElement.parentElement.style.display='none'"
-        >
-      </a>
-
-      <div>
-        ${
-          image.title
-            ? `<div>${escapeHTML(image.title)}</div>`
-            : ""
-        }
-
-        ${
-          sourceURL !== "#"
-            ? `
-              <div style="margin-top:6px">
-                <a
-                  href="${sourceURL}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Source
-                </a>
-              </div>
-            `
-            : ""
-        }
-      </div>
-    `;
-
-    grid.appendChild(card);
-  }
-
-  resultsEl.appendChild(grid);
-}
-
-
-/* =========================================================
-   NEWS
-   ========================================================= */
-
-function renderNews(data) {
-
-  const news =
-    Array.isArray(data.news_results)
-      ? data.news_results
-      : (
-          Array.isArray(data.top_stories)
-            ? data.top_stories
-            : []
-        );
-
-  if (!news.length) {
-
-    resultsEl.innerHTML = `
-      <div class="card">
-        No news results were returned.
-      </div>
-    `;
-
-    return;
-  }
-
-  for (const item of news) {
-
-    const link =
-      safeURL(
-        item.link ||
-        item.url ||
-        ""
-      );
-
-    const div = document.createElement("article");
-
-    div.className = "result";
-
-    div.innerHTML = `
-      <div class="result-url">
-        ${escapeHTML(
-          item.source ||
-          item.publisher ||
-          ""
-        )}
-      </div>
-
-      <h2>
-        <a
-          href="${link}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          ${escapeHTML(
-            item.title ||
-            "News article"
-          )}
-        </a>
-      </h2>
-
-      <p>
-        ${escapeHTML(
-          item.snippet ||
-          item.description ||
-          ""
-        )}
-      </p>
-
-      ${
-        item.date
-          ? `<div class="date">${escapeHTML(item.date)}</div>`
-          : ""
-      }
-    `;
-
-    resultsEl.appendChild(div);
+  } finally {
+    searchButton.disabled = false;
   }
 }
 
+searchForm.addEventListener("submit", event => {
+  event.preventDefault();
+  performSearch();
+});
 
-/* =========================================================
-   VIDEOS
-   ========================================================= */
-
-function renderVideos(data) {
-
-  const videos =
-    Array.isArray(data.video_results)
-      ? data.video_results
-      : (
-          Array.isArray(data.videos_results)
-            ? data.videos_results
-            : []
-        );
-
-  if (!videos.length) {
-
-    resultsEl.innerHTML = `
-      <div class="card">
-        No video results were returned.
-      </div>
-    `;
-
-    return;
-  }
-
-  const list = document.createElement("div");
-
-  list.className = "video-list";
-
-  for (const item of videos) {
-
-    const link =
-      safeURL(
-        item.link ||
-        item.url ||
-        ""
-      );
-
-    const div = document.createElement("div");
-
-    div.className = "video-item";
-
-    div.innerHTML = `
-      <a
-        href="${link}"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        ${escapeHTML(
-          item.title ||
-          "Video"
-        )}
-      </a>
-
-      ${
-        item.snippet
-          ? `<p>${escapeHTML(item.snippet)}</p>`
-          : ""
-      }
-
-      ${
-        item.channel
-          ? `<small>${escapeHTML(item.channel)}</small>`
-          : ""
-      }
-    `;
-
-    list.appendChild(div);
-  }
-
-  resultsEl.appendChild(list);
-}
-
-
-/* =========================================================
-   RELATED SEARCHES
-   ========================================================= */
-
-function renderRelated(data) {
-
+document.addEventListener("keydown", event => {
   if (
-    !Array.isArray(data.related_searches) ||
-    !data.related_searches.length
+    event.key === "/" &&
+    document.activeElement !== queryInput &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    !event.altKey
   ) {
-    return;
-  }
-
-  const card = document.createElement("div");
-
-  card.className = "card related";
-
-  card.innerHTML = `<h3>Related searches</h3>`;
-
-  for (const item of data.related_searches) {
-
-    const query =
-      typeof item === "string"
-        ? item
-        : item.query || "";
-
-    if (!query) continue;
-
-    const button = document.createElement("a");
-
-    button.href = "#";
-
-    button.textContent = query;
-
-    button.addEventListener("click", event => {
-
-      event.preventDefault();
-
-      queryInput.value = query;
-
-      performSearch(query);
-    });
-
-    card.appendChild(button);
-  }
-
-  resultsEl.appendChild(card);
-}
-
-
-/* =========================================================
-   SYSTEM THEME AUTO-UPDATE
-   ========================================================= */
-
-const systemTheme =
-  window.matchMedia("(prefers-color-scheme: dark)");
-
-systemTheme.addEventListener("change", () => {
-
-  const selected =
-    localStorage.getItem("search-theme") ||
-    "system";
-
-  if (selected === "system") {
-    applyTheme("system");
+    event.preventDefault();
+    queryInput.focus();
   }
 });
 
-
-/* =========================================================
-   START
-   ========================================================= */
-
 queryInput.focus();
-
 </script>
 
 </body>
