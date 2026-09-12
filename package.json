@@ -1,0 +1,13 @@
+{
+  "name": "google-search-app",
+  "version": "1.0.0",
+  "description": "Direct Google search frontend and backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["search", "google"],
+  "author": "Faiz1152",
+  "license": "MIT"
+}
