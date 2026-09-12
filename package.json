@@ -1,13 +1,12 @@
 {
   "name": "google-search-app",
   "version": "1.0.0",
-  "description": "Direct Google search frontend and backend",
-  "main": "server.js",
+  "description": "Direct Google search frontend and Netlify serverless backend",
+  "main": "index.html",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "build": "echo 'Build complete'"
   },
-  "keywords": ["search", "google"],
+  "keywords": ["search", "google", "netlify"],
   "author": "Faiz1152",
   "license": "MIT"
 }

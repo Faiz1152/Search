@@ -549,18 +549,17 @@ html.dark .result-url {
 <script>
 /*
 ==========================================================
-DIRECT GOOGLE SEARCH BACKEND
+DIRECT GOOGLE SEARCH - FULLY AUTOMATED
 ==========================================================
 
-This app now fetches results directly from Google via
-a backend server. No external API keys needed.
+This app fetches results directly from Google using
+a Netlify Function backend. Everything is automated.
 
-Run: node server.js
-Then access the app in your browser.
+Just deploy to Netlify and it works!
 ==========================================================
 */
 
-const BACKEND_URL = "http://localhost:3000/api/search";
+const BACKEND_URL = "/api/search";
 
 const queryInput = document.getElementById("query");
 const searchForm = document.getElementById("searchForm");
@@ -641,22 +640,6 @@ function domainFromURL(value) {
   }
 }
 
-function textValue(value) {
-  if (typeof value === "string") return value;
-
-  if (typeof value === "number") {
-    return String(value);
-  }
-
-  if (value && typeof value === "object") {
-    if (value.text) return String(value.text);
-    if (value.answer) return String(value.answer);
-    if (value.title) return String(value.title);
-  }
-
-  return "";
-}
-
 function showLoading() {
   statusBox.innerHTML = `
     <div class="loading">
@@ -716,13 +699,7 @@ function renderWebResults(data) {
 function renderCurrentTab() {
   if (!currentData) return;
 
-  switch (currentTab) {
-    case "web":
-      contentBox.innerHTML = renderWebResults(currentData);
-      break;
-    default:
-      contentBox.innerHTML = "<p>Tab content not available</p>";
-  }
+  contentBox.innerHTML = renderWebResults(currentData);
 }
 
 async function performSearch(query) {
@@ -758,7 +735,7 @@ async function performSearch(query) {
   } catch (error) {
     showError(
       error.message === "Failed to fetch"
-        ? "Make sure the backend server is running (node server.js)"
+        ? "Backend service temporarily unavailable"
         : error.message
     );
     document.body.classList.remove("has-results");
