@@ -216,6 +216,33 @@ body.has-results .hero {
   margin-bottom: 20px;
 }
 
+.tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 25px;
+  scrollbar-width: thin;
+}
+
+.tab {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 11px 16px;
+  border-bottom: 2px solid transparent;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
 .result {
   padding: 18px 0;
   border-bottom: 1px solid var(--border);
@@ -251,6 +278,152 @@ html.dark .result-url {
   color: var(--muted);
   line-height: 1.55;
   font-size: 14px;
+}
+
+.result-date {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 7px;
+}
+
+.card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 3px 15px rgba(0,0,0,.025);
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.answer {
+  line-height: 1.65;
+}
+
+.answer-source {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.answer-source a {
+  color: var(--accent);
+}
+
+.kg-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.kg-subtitle {
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.kg-description {
+  line-height: 1.6;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.feature-item {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.feature-label {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.feature-value {
+  font-weight: 600;
+}
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.media-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.media-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+.media-info {
+  padding: 11px;
+}
+
+.media-info a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.media-info a:hover {
+  color: var(--accent);
+}
+
+.news-item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.news-item:last-child {
+  border-bottom: 0;
+}
+
+.news-item a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 650;
+}
+
+.news-source {
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.related {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.related button {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 20px;
+  padding: 8px 13px;
+}
+
+.related button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .loading {
@@ -361,6 +534,8 @@ html.dark .result-url {
 
   <div id="status"></div>
 
+  <div id="tabs" class="tabs hidden"></div>
+
   <div id="content"></div>
 
 </section>
@@ -374,21 +549,33 @@ html.dark .result-url {
 <script>
 /*
 ==========================================================
-GOOGLE SEARCH - FULLY AUTOMATED ON GITHUB PAGES
+SEARCHAPI KEY
 ==========================================================
 
-Users just visit the site and search works instantly.
-No setup, no API keys, no backend needed.
+Replace ONLY the text between the quotation marks.
 
-Everything works automatically!
+Example:
+
+const API_KEY = "your-real-searchapi-key";
+
+Do NOT change the variable name.
 ==========================================================
 */
 
+const API_KEY = "ezGeMU9TnuXNnmytZSSScsbL";
+
+const API_URL = "https://www.searchapi.io/api/v1/search";
+
 const queryInput = document.getElementById("query");
 const searchForm = document.getElementById("searchForm");
+const searchButton = document.getElementById("searchButton");
 const statusBox = document.getElementById("status");
+const tabsBox = document.getElementById("tabs");
 const contentBox = document.getElementById("content");
 const themeSelect = document.getElementById("themeSelect");
+
+let currentData = null;
+let currentTab = "web";
 
 const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -419,6 +606,7 @@ mediaQuery.addEventListener("change", () => {
 
 themeSelect.addEventListener("change", () => {
   const theme = themeSelect.value;
+
   localStorage.setItem("search-theme", theme);
   applyTheme(theme);
 });
@@ -434,12 +622,18 @@ function escapeHTML(value) {
 
 function safeURL(value) {
   if (!value) return "#";
+
   try {
-    const urlObj = new URL(value);
-    if (urlObj.protocol === "http:" || urlObj.protocol === "https:") {
-      return urlObj.href;
+    const url = new URL(value);
+
+    if (
+      url.protocol === "http:" ||
+      url.protocol === "https:"
+    ) {
+      return url.href;
     }
   } catch (_) {}
+
   return "#";
 }
 
@@ -451,6 +645,22 @@ function domainFromURL(value) {
   }
 }
 
+function textValue(value) {
+  if (typeof value === "string") return value;
+
+  if (typeof value === "number") {
+    return String(value);
+  }
+
+  if (value && typeof value === "object") {
+    if (value.text) return String(value.text);
+    if (value.answer) return String(value.answer);
+    if (value.title) return String(value.title);
+  }
+
+  return "";
+}
+
 function showLoading() {
   statusBox.innerHTML = `
     <div class="loading">
@@ -458,7 +668,9 @@ function showLoading() {
       <span>Searching...</span>
     </div>
   `;
+
   contentBox.innerHTML = "";
+  tabsBox.classList.add("hidden");
 }
 
 function showError(message) {
@@ -468,6 +680,8 @@ function showError(message) {
       <div style="margin-top:6px">${escapeHTML(message)}</div>
     </div>
   `;
+
+  tabsBox.classList.add("hidden");
   contentBox.innerHTML = "";
 }
 
@@ -475,112 +689,876 @@ function clearStatus() {
   statusBox.innerHTML = "";
 }
 
-function parseGoogleHTML(html) {
-  const results = [];
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  
-  const searchResults = div.querySelectorAll('div[data-sokoban-container]');
-  
-  searchResults.forEach((result) => {
-    const titleEl = result.querySelector('h3');
-    const linkEl = result.querySelector('a[href^="http"]');
-    const descEl = result.querySelector('[data-content-feature="1"]');
-    
-    if (titleEl && linkEl) {
-      const link = linkEl.getAttribute('href');
-      // Skip Google redirect links
-      if (link && !link.includes('/url?q=')) {
-        results.push({
-          title: titleEl.innerText || titleEl.textContent,
-          link: link,
-          snippet: descEl ? descEl.innerText || descEl.textContent : ''
-        });
-      }
-    }
-  });
-  
-  return results;
-}
+function createTabs(data) {
+  const tabs = [
+    ["web", "Web"],
+    ["images", "Images"],
+    ["news", "News"],
+    ["videos", "Videos"]
+  ];
 
-function renderResults(results) {
-  if (!results || results.length === 0) {
-    contentBox.innerHTML = "<p style='text-align:center;color:var(--muted)'>No results found</p>";
+  const available = [];
+
+  if (Array.isArray(data.organic_results)) {
+    available.push("web");
+  }
+
+  if (Array.isArray(data.images)) {
+    available.push("images");
+  }
+
+  if (
+    Array.isArray(data.video_results) ||
+    Array.isArray(data.videos)
+  ) {
+    available.push("videos");
+  }
+
+  if (
+    Array.isArray(data.news_results) ||
+    Array.isArray(data.top_stories)
+  ) {
+    available.push("news");
+  }
+
+  if (!available.length) {
+    tabsBox.classList.add("hidden");
     return;
   }
 
-  contentBox.innerHTML = results
-    .map(result => `
-      <div class="result">
-        <div class="result-url">
-          ${escapeHTML(domainFromURL(result.link))}
-        </div>
-        <h2 class="result-title">
-          <a
-            href="${safeURL(result.link)}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            ${escapeHTML(result.title)}
-          </a>
-        </h2>
-        <div class="result-description">
-          ${escapeHTML(result.snippet)}
-        </div>
-      </div>
+  tabsBox.classList.remove("hidden");
+
+  tabsBox.innerHTML = tabs
+    .filter(([id]) => available.includes(id))
+    .map(([id, label]) => `
+      <button
+        class="tab ${currentTab === id ? "active" : ""}"
+        data-tab="${id}"
+      >
+        ${label}
+      </button>
     `)
     .join("");
+
+  tabsBox.querySelectorAll(".tab").forEach(button => {
+    button.addEventListener("click", () => {
+      currentTab = button.dataset.tab;
+
+      tabsBox
+        .querySelectorAll(".tab")
+        .forEach(tab => tab.classList.remove("active"));
+
+      button.classList.add("active");
+
+      renderCurrentTab();
+    });
+  });
 }
 
-async function performSearch(query) {
-  if (!query.trim()) {
-    showError("Please enter a search query");
+function renderAnswerBox(data) {
+  const answer = data.answer_box;
+
+  if (!answer) return "";
+
+  const title =
+    answer.title ||
+    answer.type ||
+    "Answer";
+
+  const answerText =
+    answer.answer ||
+    answer.snippet ||
+    answer.result ||
+    "";
+
+  if (!answerText && !answer.title) return "";
+
+  let source = "";
+
+  if (answer.link) {
+    source = `
+      <div class="answer-source">
+        <a
+          href="${safeURL(answer.link)}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          ${escapeHTML(
+            answer.source ||
+            domainFromURL(answer.link) ||
+            "Source"
+          )}
+        </a>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">
+        ${escapeHTML(title)}
+      </div>
+
+      <div class="answer">
+        ${escapeHTML(answerText)}
+      </div>
+
+      ${source}
+    </div>
+  `;
+}
+
+function renderKnowledgeGraph(data) {
+  const kg = data.knowledge_graph;
+
+  if (!kg) return "";
+
+  const title = kg.title || kg.name;
+
+  const description =
+    kg.description ||
+    kg.description_source ||
+    "";
+
+  if (!title && !description) return "";
+
+  return `
+    <div class="card">
+      ${
+        title
+          ? `<div class="kg-title">${escapeHTML(title)}</div>`
+          : ""
+      }
+
+      ${
+        kg.type
+          ? `<div class="kg-subtitle">${escapeHTML(kg.type)}</div>`
+          : ""
+      }
+
+      ${
+        description
+          ? `<div class="kg-description">${escapeHTML(description)}</div>`
+          : ""
+      }
+
+      ${
+        kg.website
+          ? `
+            <div class="answer-source">
+              <a
+                href="${safeURL(kg.website)}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Official website
+              </a>
+            </div>
+          `
+          : ""
+      }
+    </div>
+  `;
+}
+
+function renderCalculator(data) {
+  if (data.calculator_result === undefined) {
+    return "";
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">Calculator</div>
+
+      <div style="font-size:28px;font-weight:700;">
+        ${escapeHTML(textValue(data.calculator_result))}
+      </div>
+    </div>
+  `;
+}
+
+function renderWeather(data) {
+  const weather = data.weather_result;
+
+  if (!weather) return "";
+
+  const fields = [];
+
+  if (weather.temperature !== undefined) {
+    fields.push(["Temperature", weather.temperature]);
+  }
+
+  if (weather.weather) {
+    fields.push(["Condition", weather.weather]);
+  }
+
+  if (weather.precipitation !== undefined) {
+    fields.push(["Precipitation", weather.precipitation]);
+  }
+
+  if (weather.humidity !== undefined) {
+    fields.push(["Humidity", weather.humidity]);
+  }
+
+  if (weather.wind !== undefined) {
+    fields.push(["Wind", weather.wind]);
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">
+        ${escapeHTML(weather.location || "Weather")}
+      </div>
+
+      ${
+        fields.length
+          ? `
+            <div class="feature-grid">
+              ${fields.map(([name, value]) => `
+                <div class="feature-item">
+                  <div class="feature-label">
+                    ${escapeHTML(name)}
+                  </div>
+                  <div class="feature-value">
+                    ${escapeHTML(value)}
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          `
+          : `
+            <div class="answer">
+              ${escapeHTML(JSON.stringify(weather))}
+            </div>
+          `
+      }
+    </div>
+  `;
+}
+
+function renderFinance(data) {
+  const finance =
+    data.finance_results ||
+    (
+      data.answer_box &&
+      data.answer_box.type === "finance_results"
+        ? data.answer_box
+        : null
+    );
+
+  if (!finance) return "";
+
+  const fields = [];
+
+  if (finance.price !== undefined) {
+    fields.push(["Price", finance.price]);
+  }
+
+  if (finance.currency) {
+    fields.push(["Currency", finance.currency]);
+  }
+
+  if (finance.exchange) {
+    fields.push(["Exchange", finance.exchange]);
+  }
+
+  if (finance.previous_close !== undefined) {
+    fields.push(["Previous close", finance.previous_close]);
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">
+        ${escapeHTML(
+          finance.title ||
+          finance.stock ||
+          "Finance"
+        )}
+      </div>
+
+      ${
+        fields.length
+          ? `
+            <div class="feature-grid">
+              ${fields.map(([name, value]) => `
+                <div class="feature-item">
+                  <div class="feature-label">
+                    ${escapeHTML(name)}
+                  </div>
+                  <div class="feature-value">
+                    ${escapeHTML(value)}
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          `
+          : ""
+      }
+
+      ${
+        finance.price_change
+          ? `
+            <div style="margin-top:14px;">
+              Change:
+              ${escapeHTML(
+                finance.price_change.amount ??
+                ""
+              )}
+              ${
+                finance.price_change.percentage !== undefined
+                  ? ` (${escapeHTML(finance.price_change.percentage)}%)`
+                  : ""
+              }
+            </div>
+          `
+          : ""
+      }
+    </div>
+  `;
+}
+
+function renderLocal(data) {
+  const local =
+    data.local_results ||
+    data.places ||
+    [];
+
+  if (!Array.isArray(local) || !local.length) {
+    return "";
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">Places</div>
+
+      ${local.slice(0, 8).map(place => {
+        const name =
+          place.title ||
+          place.name ||
+          "Place";
+
+        const address =
+          place.address ||
+          place.location ||
+          "";
+
+        const link =
+          place.link ||
+          place.website ||
+          "";
+
+        return `
+          <div class="news-item">
+            ${
+              link
+                ? `
+                  <a
+                    href="${safeURL(link)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    ${escapeHTML(name)}
+                  </a>
+                `
+                : `
+                  <strong>${escapeHTML(name)}</strong>
+                `
+            }
+
+            ${
+              address
+                ? `
+                  <div class="news-source">
+                    ${escapeHTML(address)}
+                  </div>
+                `
+                : ""
+            }
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderRelated(data) {
+  const related = data.related_searches;
+
+  if (!Array.isArray(related) || !related.length) {
+    return "";
+  }
+
+  return `
+    <div class="card">
+      <div class="card-title">Related searches</div>
+
+      <div class="related">
+        ${related.slice(0, 12).map(item => {
+          const query =
+            typeof item === "string"
+              ? item
+              : item.query || item.title || "";
+
+          if (!query) return "";
+
+          return `
+            <button
+              type="button"
+              data-related="${escapeHTML(query)}"
+            >
+              ${escapeHTML(query)}
+            </button>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderWeb(data) {
+  let html = "";
+
+  html += renderAnswerBox(data);
+  html += renderKnowledgeGraph(data);
+  html += renderCalculator(data);
+  html += renderWeather(data);
+  html += renderFinance(data);
+  html += renderLocal(data);
+
+  const results = Array.isArray(data.organic_results)
+    ? data.organic_results
+    : [];
+
+  if (!results.length) {
+    html += `
+      <div class="status">
+        No web results were returned.
+      </div>
+    `;
+  } else {
+    html += results.map(item => {
+      const url = safeURL(
+        item.link ||
+        item.url ||
+        ""
+      );
+
+      const title =
+        item.title ||
+        "Untitled result";
+
+      const description =
+        item.snippet ||
+        item.description ||
+        "";
+
+      const displayUrl =
+        item.displayed_link ||
+        item.source ||
+        item.link ||
+        "";
+
+      return `
+        <article class="result">
+          <div class="result-url">
+            ${escapeHTML(displayUrl)}
+          </div>
+
+          <h2 class="result-title">
+            <a
+              href="${url}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ${escapeHTML(title)}
+            </a>
+          </h2>
+
+          ${
+            description
+              ? `
+                <div class="result-description">
+                  ${escapeHTML(description)}
+                </div>
+              `
+              : ""
+          }
+
+          ${
+            item.date
+              ? `
+                <div class="result-date">
+                  ${escapeHTML(item.date)}
+                </div>
+              `
+              : ""
+          }
+        </article>
+      `;
+    }).join("");
+  }
+
+  html += renderRelated(data);
+
+  return html;
+}
+
+function renderImages(data) {
+  const images = Array.isArray(data.images)
+    ? data.images
+    : Array.isArray(data.images_results)
+      ? data.images_results
+      : [];
+
+  if (!images.length) {
+    return `
+      <div class="status">
+        No image results were returned.
+      </div>
+    `;
+  }
+
+  return `
+    <div class="media-grid">
+      ${images.map(item => {
+        const image =
+          item.original?.link ||
+          item.original ||
+          item.thumbnail ||
+          item.link ||
+          "";
+
+        const link =
+          item.link ||
+          item.original?.link ||
+          "#";
+
+        const title =
+          item.title ||
+          item.source?.name ||
+          "Image";
+
+        if (!image) return "";
+
+        return `
+          <article class="media-card">
+            <a
+              href="${safeURL(link)}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="${safeURL(image)}"
+                alt="${escapeHTML(title)}"
+                loading="lazy"
+                onerror="this.style.display='none'"
+              >
+            </a>
+
+            <div class="media-info">
+              <a
+                href="${safeURL(link)}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                ${escapeHTML(title)}
+              </a>
+            </div>
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderNews(data) {
+  const news = Array.isArray(data.news_results)
+    ? data.news_results
+    : Array.isArray(data.top_stories)
+      ? data.top_stories
+      : [];
+
+  if (!news.length) {
+    return `
+      <div class="status">
+        No news results were returned.
+      </div>
+    `;
+  }
+
+  return `
+    <div class="card">
+      ${news.map(item => {
+        const title =
+          item.title ||
+          "News result";
+
+        const link =
+          item.link ||
+          item.url ||
+          "#";
+
+        const source =
+          item.source?.name ||
+          item.source ||
+          "";
+
+        const date =
+          item.date ||
+          "";
+
+        const snippet =
+          item.snippet ||
+          item.description ||
+          "";
+
+        return `
+          <article class="news-item">
+            <a
+              href="${safeURL(link)}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ${escapeHTML(title)}
+            </a>
+
+            ${
+              snippet
+                ? `
+                  <div class="result-description" style="margin-top:6px;">
+                    ${escapeHTML(snippet)}
+                  </div>
+                `
+                : ""
+            }
+
+            <div class="news-source">
+              ${escapeHTML(source)}
+              ${source && date ? " • " : ""}
+              ${escapeHTML(date)}
+            </div>
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderVideos(data) {
+  const videos =
+    Array.isArray(data.video_results)
+      ? data.video_results
+      : Array.isArray(data.videos)
+        ? data.videos
+        : [];
+
+  if (!videos.length) {
+    return `
+      <div class="status">
+        No video results were returned.
+      </div>
+    `;
+  }
+
+  return `
+    <div class="card">
+      ${videos.map(item => {
+        const title =
+          item.title ||
+          "Video";
+
+        const link =
+          item.link ||
+          item.url ||
+          "#";
+
+        const source =
+          item.source ||
+          item.channel ||
+          "";
+
+        return `
+          <article class="news-item">
+            <a
+              href="${safeURL(link)}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              ${escapeHTML(title)}
+            </a>
+
+            ${
+              source
+                ? `
+                  <div class="news-source">
+                    ${escapeHTML(source)}
+                  </div>
+                `
+                : ""
+            }
+          </article>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderCurrentTab() {
+  if (!currentData) return;
+
+  if (currentTab === "images") {
+    contentBox.innerHTML = renderImages(currentData);
     return;
   }
 
-  showLoading();
+  if (currentTab === "news") {
+    contentBox.innerHTML = renderNews(currentData);
+    return;
+  }
+
+  if (currentTab === "videos") {
+    contentBox.innerHTML = renderVideos(currentData);
+    return;
+  }
+
+  contentBox.innerHTML = renderWeb(currentData);
+
+  document
+    .querySelectorAll("[data-related]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        queryInput.value =
+          button.dataset.related;
+
+        performSearch();
+      });
+    });
+}
+
+async function performSearch() {
+  const query = queryInput.value.trim();
+
+  if (!query) {
+    queryInput.focus();
+    return;
+  }
+
+  if (!API_KEY || API_KEY === "YOUR_SEARCHAPI_KEY_HERE") {
+    showError(
+      "Add your SearchApi API key in the API_KEY line first."
+    );
+    return;
+  }
+
   document.body.classList.add("has-results");
 
+  searchButton.disabled = true;
+
+  showLoading();
+
+  currentTab = "web";
+
   try {
-    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}&num=10`;
-    const corsProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}`;
-    
-    const response = await fetch(corsProxy);
-    
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    const params = new URLSearchParams();
+
+    params.set("engine", "google");
+    params.set("q", query);
+
+    params.set("api_key", API_KEY);
+
+    params.set("hl", "en");
+    params.set("gl", "us");
+
+    /*
+      Ask SearchApi to resolve Google redirect links
+      when possible.
+    */
+    params.set("link", "resolved");
+
+    const response = await fetch(
+      API_URL + "?" + params.toString(),
+      {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      }
+    );
+
+    let data;
+
+    try {
+      data = await response.json();
+    } catch (_) {
+      throw new Error(
+        "SearchApi returned an invalid response."
+      );
     }
 
-    const data = await response.json();
-    const results = parseGoogleHTML(data.contents);
-    
-    if (results.length === 0) {
-      showError("No results found");
-      return;
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        data.message ||
+        `SearchApi returned HTTP ${response.status}.`
+      );
     }
+
+    if (data.error) {
+      throw new Error(
+        data.error
+      );
+    }
+
+    currentData = data;
 
     clearStatus();
-    renderResults(results);
-    queryInput.value = query;
+
+    createTabs(data);
+
+    renderCurrentTab();
+
   } catch (error) {
-    showError(error.message || "Search unavailable");
-    document.body.classList.remove("has-results");
+
+    let message = error?.message ||
+      "Unable to complete the search.";
+
+    if (
+      message.toLowerCase().includes("failed to fetch")
+    ) {
+      message =
+        "The browser could not connect to SearchApi. " +
+        "If this happens while opening the HTML as a file, " +
+        "host the file on HTTPS (for example GitHub Pages). " +
+        "This page does not use SerpApi or your WebSearch backend.";
+    }
+
+    showError(message);
+
+  } finally {
+    searchButton.disabled = false;
   }
 }
 
-searchForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const query = queryInput.value.trim();
-  performSearch(query);
+searchForm.addEventListener("submit", event => {
+  event.preventDefault();
+  performSearch();
 });
 
-// Check if params in URL for direct search
-const params = new URLSearchParams(window.location.search);
-if (params.has("q")) {
-  const q = params.get("q");
-  queryInput.value = q;
-  performSearch(q);
-}
+document.addEventListener("keydown", event => {
+  if (
+    event.key === "/" &&
+    document.activeElement !== queryInput &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    !event.altKey
+  ) {
+    event.preventDefault();
+    queryInput.focus();
+  }
+});
+
+queryInput.focus();
 </script>
+
 </body>
 </html>
