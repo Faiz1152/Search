@@ -216,33 +216,6 @@ body.has-results .hero {
   margin-bottom: 20px;
 }
 
-.tabs {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 25px;
-  scrollbar-width: thin;
-}
-
-.tab {
-  flex: 0 0 auto;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  padding: 11px 16px;
-  border-bottom: 2px solid transparent;
-}
-
-.tab:hover {
-  color: var(--text);
-}
-
-.tab.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
-}
-
 .result {
   padding: 18px 0;
   border-bottom: 1px solid var(--border);
@@ -278,152 +251,6 @@ html.dark .result-url {
   color: var(--muted);
   line-height: 1.55;
   font-size: 14px;
-}
-
-.result-date {
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 7px;
-}
-
-.card {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 18px;
-  box-shadow: 0 3px 15px rgba(0,0,0,.025);
-}
-
-.card-title {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 12px;
-}
-
-.answer {
-  line-height: 1.65;
-}
-
-.answer-source {
-  margin-top: 12px;
-  font-size: 13px;
-}
-
-.answer-source a {
-  color: var(--accent);
-}
-
-.kg-title {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 5px;
-}
-
-.kg-subtitle {
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-
-.kg-description {
-  line-height: 1.6;
-}
-
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-}
-
-.feature-item {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
-}
-
-.feature-label {
-  color: var(--muted);
-  font-size: 12px;
-  margin-bottom: 5px;
-}
-
-.feature-value {
-  font-weight: 600;
-}
-
-.media-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 14px;
-}
-
-.media-card {
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--surface);
-}
-
-.media-card img {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  display: block;
-}
-
-.media-info {
-  padding: 11px;
-}
-
-.media-info a {
-  color: var(--text);
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.media-info a:hover {
-  color: var(--accent);
-}
-
-.news-item {
-  padding: 14px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.news-item:last-child {
-  border-bottom: 0;
-}
-
-.news-item a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 650;
-}
-
-.news-source {
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 5px;
-}
-
-.related {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.related button {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  border-radius: 20px;
-  padding: 8px 13px;
-}
-
-.related button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
 }
 
 .loading {
@@ -534,8 +361,6 @@ html.dark .result-url {
 
   <div id="status"></div>
 
-  <div id="tabs" class="tabs hidden"></div>
-
   <div id="content"></div>
 
 </section>
@@ -549,28 +374,21 @@ html.dark .result-url {
 <script>
 /*
 ==========================================================
-DIRECT GOOGLE SEARCH - FULLY AUTOMATED
+GOOGLE SEARCH - FULLY AUTOMATED ON GITHUB PAGES
 ==========================================================
 
-This app fetches results directly from Google using
-a Netlify Function backend. Everything is automated.
+Users just visit the site and search works instantly.
+No setup, no API keys, no backend needed.
 
-Just deploy to Netlify and it works!
+Everything works automatically!
 ==========================================================
 */
 
-const BACKEND_URL = "/api/search";
-
 const queryInput = document.getElementById("query");
 const searchForm = document.getElementById("searchForm");
-const searchButton = document.getElementById("searchButton");
 const statusBox = document.getElementById("status");
-const tabsBox = document.getElementById("tabs");
 const contentBox = document.getElementById("content");
 const themeSelect = document.getElementById("themeSelect");
-
-let currentData = null;
-let currentTab = "web";
 
 const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -601,7 +419,6 @@ mediaQuery.addEventListener("change", () => {
 
 themeSelect.addEventListener("change", () => {
   const theme = themeSelect.value;
-
   localStorage.setItem("search-theme", theme);
   applyTheme(theme);
 });
@@ -617,18 +434,12 @@ function escapeHTML(value) {
 
 function safeURL(value) {
   if (!value) return "#";
-
   try {
     const urlObj = new URL(value);
-
-    if (
-      urlObj.protocol === "http:" ||
-      urlObj.protocol === "https:"
-    ) {
+    if (urlObj.protocol === "http:" || urlObj.protocol === "https:") {
       return urlObj.href;
     }
   } catch (_) {}
-
   return "#";
 }
 
@@ -647,9 +458,7 @@ function showLoading() {
       <span>Searching...</span>
     </div>
   `;
-
   contentBox.innerHTML = "";
-  tabsBox.classList.add("hidden");
 }
 
 function showError(message) {
@@ -659,8 +468,6 @@ function showError(message) {
       <div style="margin-top:6px">${escapeHTML(message)}</div>
     </div>
   `;
-
-  tabsBox.classList.add("hidden");
   contentBox.innerHTML = "";
 }
 
@@ -668,12 +475,41 @@ function clearStatus() {
   statusBox.innerHTML = "";
 }
 
-function renderWebResults(data) {
-  if (!Array.isArray(data.organic_results)) {
-    return "<p>No results found</p>";
+function parseGoogleHTML(html) {
+  const results = [];
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  
+  const searchResults = div.querySelectorAll('div[data-sokoban-container]');
+  
+  searchResults.forEach((result) => {
+    const titleEl = result.querySelector('h3');
+    const linkEl = result.querySelector('a[href^="http"]');
+    const descEl = result.querySelector('[data-content-feature="1"]');
+    
+    if (titleEl && linkEl) {
+      const link = linkEl.getAttribute('href');
+      // Skip Google redirect links
+      if (link && !link.includes('/url?q=')) {
+        results.push({
+          title: titleEl.innerText || titleEl.textContent,
+          link: link,
+          snippet: descEl ? descEl.innerText || descEl.textContent : ''
+        });
+      }
+    }
+  });
+  
+  return results;
+}
+
+function renderResults(results) {
+  if (!results || results.length === 0) {
+    contentBox.innerHTML = "<p style='text-align:center;color:var(--muted)'>No results found</p>";
+    return;
   }
 
-  return data.organic_results
+  contentBox.innerHTML = results
     .map(result => `
       <div class="result">
         <div class="result-url">
@@ -689,17 +525,11 @@ function renderWebResults(data) {
           </a>
         </h2>
         <div class="result-description">
-          ${escapeHTML(result.snippet || '')}
+          ${escapeHTML(result.snippet)}
         </div>
       </div>
     `)
     .join("");
-}
-
-function renderCurrentTab() {
-  if (!currentData) return;
-
-  contentBox.innerHTML = renderWebResults(currentData);
 }
 
 async function performSearch(query) {
@@ -712,32 +542,28 @@ async function performSearch(query) {
   document.body.classList.add("has-results");
 
   try {
-    const response = await fetch(
-      `${BACKEND_URL}?q=${encodeURIComponent(query)}`
-    );
-
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}&num=10`;
+    const corsProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}`;
+    
+    const response = await fetch(corsProxy);
+    
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
 
     const data = await response.json();
-
-    if (data.error) {
-      showError(data.message || data.error);
+    const results = parseGoogleHTML(data.contents);
+    
+    if (results.length === 0) {
+      showError("No results found");
       return;
     }
 
-    currentData = data;
-    currentTab = "web";
     clearStatus();
-    renderCurrentTab();
+    renderResults(results);
     queryInput.value = query;
   } catch (error) {
-    showError(
-      error.message === "Failed to fetch"
-        ? "Backend service temporarily unavailable"
-        : error.message
-    );
+    showError(error.message || "Search unavailable");
     document.body.classList.remove("has-results");
   }
 }

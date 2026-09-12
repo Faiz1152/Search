@@ -1,36 +1,26 @@
-# Google Search App
+# 🔍 Google Search
 
-A beautiful, modern search engine that fetches results directly from Google.
+A beautiful, modern search engine that fetches Google results directly.
 
-## Features
-- 🎨 Beautiful dark/light theme support
-- 🚀 Fully automated - no manual backend required
-- 🔍 Direct Google search results
-- 📱 Responsive mobile-friendly design
-- ⚡ Instant deployment to Netlify
+## ✨ Features
+- 🎨 Beautiful dark/light theme
+- ⚡ Instant search results
+- 📱 Fully responsive design
+- 🚀 No setup required - just visit and search!
 
-## Deploy to Netlify
+## 🎯 How to Use
 
-1. Connect this repo to Netlify
-2. Netlify automatically detects the serverless functions
-3. Click Deploy
-4. Done! The search engine works automatically
+That's it! Just visit: **https://faiz1152.github.io/Search/**
 
-No API keys, no manual server setup needed!
+No API keys, no setup, no backend. Everything works automatically.
 
-## How it works
+## How It Works
 
-- **Frontend**: `index.html` - Beautiful search interface
-- **Backend**: `functions/search.js` - Netlify Function that scrapes Google results
-- The backend runs automatically on Netlify (no manual setup)
+- Frontend fetches Google search results through a public CORS proxy
+- Results are parsed and displayed beautifully
+- Dark/light theme preference is saved locally
+- Everything runs client-side on GitHub Pages
 
-## Development
+## 🛠️ Development
 
-For local testing:
-
-```bash
-npm install
-npm run dev  # Start Netlify dev server
-```
-
-Then open `http://localhost:3000` in your browser.
+Simply edit `index.html` and push to GitHub. GitHub Pages automatically deploys changes.
