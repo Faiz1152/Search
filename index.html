@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search</title>
+<style>
+/* ============ 1. THEME TOKENS ============ */
+:root {
+  --bg: #f5f6f8; --surface: #ffffff; --surface-2: #eceef2; --ink: #15171c; --muted: #636a78;
+  --line: #d9dce3; --accent: #2f5bea; --accent-ink: #ffffff; --shadow: 0 6px 24px rgba(20,24,40,.10);
+  --radius: 999px; --radius-lg: 18px; --gap: 16px;
+  --font: "Avenir Next", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101216; --surface: #181b21; --surface-2: #232730; --ink: #eceef3; --muted: #9aa1b0;
+    --line: #2d323d; --accent: #7c9cff; --accent-ink: #0b1020; --shadow: 0 6px 24px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101216; --surface: #181b21; --surface-2: #232730; --ink: #eceef3; --muted: #9aa1b0;
+  --line: #2d323d; --accent: #7c9cff; --accent-ink: #0b1020; --shadow: 0 6px 24px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+
+/* ============ 2. BASE ============ */
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { min-height: 100dvh; background: var(--bg); color: var(--ink); font-family: var(--font); line-height: 1.5; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+/* ============ 3. HEADER / THEME ============ */
+.top { display: flex; align-items: center; gap: var(--gap); padding: 14px 20px; }
+.top .logo { font-size: 1.6rem; line-height: 1; }
+.top .slot { flex: 1; min-width: 0; }
+.theme-select {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 8px 14px; cursor: pointer;
+}
+body.home .top { position: absolute; top: 0; right: 0; left: auto; padding: 14px 20px; }
+body.home .top .logo, body.home .top .slot { display: none; }
+body.results .top { border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; z-index: 20; }
+@media (max-width: 560px) {
+  body.results .top { flex-wrap: wrap; row-gap: 10px; }
+  body.results .top .slot { order: 3; flex-basis: 100%; }
+  body.results .top .logo { margin-right: auto; }
+}
+
+/* ============ 4. HOME HERO ============ */
+.hero { min-height: 100dvh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 24px 20px 12vh; text-align: center; }
+.hero .big { font-size: clamp(4rem, 14vw, 6.5rem); line-height: 1; }
+.hero h1 { margin: 8px 0 28px; font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 600; letter-spacing: -0.02em; }
+.hero .slot { width: 100%; max-width: 620px; }
+body.results .hero { display: none; }
+
+/* ============ 5. SEARCH BAR + SUGGESTIONS ============ */
+.search-wrap { position: relative; width: 100%; text-align: left; }
+.bar { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 5px 5px 5px 20px; box-shadow: var(--shadow); }
+.bar:focus-within { border-color: var(--accent); }
+.bar input { flex: 1; min-width: 0; border: 0; background: transparent; outline: 0; padding: 9px 0; font-size: 1rem; }
+.icon-btn { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%;
+  background: transparent; color: var(--muted); cursor: pointer; flex: none; }
+.icon-btn:hover { background: var(--surface-2); color: var(--ink); }
+.icon-btn.listening { background: #d93a3a; color: #fff; animation: pulse 1.2s ease-in-out infinite; }
+.icon-btn.go { background: var(--accent); color: var(--accent-ink); }
+.icon-btn.go:hover { background: var(--accent); filter: brightness(1.1); }
+.icon-btn svg { width: 20px; height: 20px; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px rgba(217,58,58,.25); } }
+.status { min-height: 1.4em; margin: 6px 20px 0; font-size: .85rem; color: var(--muted); }
+.suggest { position: absolute; left: 0; right: 0; top: calc(100% - 1.4em - 6px + 4px); margin: 0; padding: 6px; list-style: none;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); z-index: 30; }
+.status:not(:empty) ~ .suggest { top: calc(100% + 4px); }
+.suggest li { padding: 9px 14px; border-radius: 12px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.suggest li:hover { background: var(--surface-2); }
+
+/* ============ 6. RESULTS ============ */
+.results-view { display: none; max-width: 1100px; margin: 0 auto; padding: 24px 20px 56px; }
+body.results .results-view { display: block; animation: fade .3s ease both; }
+@keyframes fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+@media (max-width: 800px) { .cols { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 22px; min-width: 0; }
+.card h2 { margin: 0 0 12px; font-size: 1.4rem; letter-spacing: -0.01em; }
+.card p { margin: 0 0 12px; }
+.card a { color: var(--accent); }
+.card .thumb { float: right; max-width: 40%; max-height: 160px; margin: 0 0 10px 16px; border-radius: 12px; }
+.card .src { clear: both; color: var(--muted); font-size: .9rem; }
+.muted { color: var(--muted); }
+.skeleton { background: linear-gradient(90deg, var(--surface-2), var(--line), var(--surface-2)); background-size: 200% 100%;
+  animation: shimmer 1.3s linear infinite; border-radius: 10px; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+.line-skel { height: 14px; margin-bottom: 12px; }
+.img-frame { padding: 12px; }
+.img-frame .ph { aspect-ratio: 1 / 1; width: 100%; border-radius: 12px; display: grid; place-items: center; color: var(--muted); text-align: center; padding: 16px; }
+.img-frame img { display: block; width: 100%; height: auto; border-radius: 12px; }
+.related { margin-top: 32px; }
+.related h2 { font-size: 1.2rem; margin: 0 0 12px; }
+.related ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.related button { width: 100%; text-align: left; padding: 10px 16px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius); cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.related button:hover { border-color: var(--accent); }
+</style>
+</head>
+<body class="home">
+
+<!-- ============ HTML STRUCTURE ============ -->
+<header class="top">
+  <span class="logo" aria-hidden="true">🔍</span>
+  <div class="slot" id="headerSlot"></div>
+  <select class="theme-select" id="themeSelect" aria-label="Theme">
+    <option value="system">System</option>
+    <option value="light">Light</option>
+    <option value="dark">Dark</option>
+  </select>
+</header>
+
+<main class="hero">
+  <div class="big" aria-hidden="true">🔍</div>
+  <h1>Search</h1>
+  <div class="slot" id="homeSlot">
+    <div class="search-wrap" id="searchWrap">
+      <form class="bar" id="searchForm" role="search" autocomplete="off">
+        <input id="q" type="text" placeholder="Search" aria-label="Search query" autocomplete="off" spellcheck="false">
+        <button type="button" class="icon-btn" id="micBtn" aria-label="Dictate query">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        </button>
+        <button type="submit" class="icon-btn go" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </button>
+      </form>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+      <ul class="suggest" id="suggest" role="listbox" hidden></ul>
+    </div>
+  </div>
+</main>
+
+<section class="results-view" id="resultsView">
+  <div class="cols">
+    <article class="card" id="summary" aria-live="polite"></article>
+    <div class="card img-frame" id="imageBox" aria-live="polite"></div>
+  </div>
+  <section class="related" id="related" hidden>
+    <h2>Related Searches</h2>
+    <ul id="relatedList"></ul>
+  </section>
+</section>
+
+<script>
+/* ============ A. HELPERS ============ */
+const $ = (s) => document.querySelector(s);
+const el = (tag, props = {}, ...kids) => {
+  const n = Object.assign(document.createElement(tag), props);
+  kids.forEach((k) => n.append(k));
+  return n;
+};
+const isAbort = (e) => e && e.name === "AbortError";
+
+/* ============ B. THEME (cookie-persisted) ============ */
+function getCookie(name) {
+  const m = document.cookie.split("; ").find((c) => c.startsWith(name + "="));
+  return m ? decodeURIComponent(m.slice(name.length + 1)) : null;
+}
+function setCookie(name, value) {
+  document.cookie = `${name}=${encodeURIComponent(value)}; max-age=31536000; path=/; SameSite=Lax`;
+}
+function applyTheme(mode) {
+  // "system" removes the override so the prefers-color-scheme media query
+  // (which updates live when the OS setting changes) controls the colors.
+  if (mode === "light" || mode === "dark") document.documentElement.dataset.theme = mode;
+  else delete document.documentElement.dataset.theme;
+}
+function initTheme() {
+  const saved = getCookie("theme");
+  const mode = ["system", "light", "dark"].includes(saved) ? saved : "system";
+  $("#themeSelect").value = mode;
+  applyTheme(mode);
+  $("#themeSelect").addEventListener("change", (e) => {
+    setCookie("theme", e.target.value);
+    applyTheme(e.target.value);
+  });
+}
+
+/* ============ C. SUGGESTIONS (Google → DuckDuckGo fallback) ============ */
+const GOOGLE_AC = "https://suggestqueries.google.com/complete/search?client=firefox&q=";
+const DDG_AC = "https://duckduckgo.com/ac/?type=list&q=";
+
+// Google (client=firefox) and DDG (type=list) both return ["query", ["s1", "s2", ...]].
+// DDG's default format is [{phrase: "..."}]; handle that too.
+function parseSuggestions(data) {
+  let list = [];
+  if (Array.isArray(data) && Array.isArray(data[1])) list = data[1];
+  else if (Array.isArray(data)) list = data.map((d) => d && d.phrase);
+  const seen = new Set();
+  return list.filter((s) => {
+    if (typeof s !== "string") return false;
+    const k = s.trim().toLowerCase();
+    if (!k || seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+async function tryAutocomplete(url, signal) {
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  return parseSuggestions(await res.json());
+}
+async function fetchSuggestions(query, signal) {
+  const enc = encodeURIComponent(query);
+  try {
+    const list = await tryAutocomplete(GOOGLE_AC + enc, signal);
+    if (list.length) return list;
+  } catch (e) { if (isAbort(e)) throw e; }
+  try {
+    return await tryAutocomplete(DDG_AC + enc, signal);
+  } catch (e) { if (isAbort(e)) throw e; }
+  return [];
+}
+
+const suggestBox = $("#suggest");
+let suggestSeq = 0, suggestCtl = null, suggestTimer = null;
+
+function hideSuggestions() {
+  suggestSeq++; // invalidate any in-flight response
+  if (suggestCtl) suggestCtl.abort();
+  suggestBox.hidden = true;
+  suggestBox.replaceChildren();
+}
+function showSuggestions(list) {
+  suggestBox.replaceChildren(...list.slice(0, 8).map((s) => {
+    const li = el("li", { textContent: s, role: "option" });
+    li.addEventListener("mousedown", (e) => e.preventDefault());
+    li.addEventListener("click", () => submitQuery(s));
+    return li;
+  }));
+  suggestBox.hidden = list.length === 0;
+}
+function onInput() {
+  clearTimeout(suggestTimer);
+  const q = $("#q").value.trim();
+  if (!q) return hideSuggestions();
+  suggestTimer = setTimeout(async () => {
+    const id = ++suggestSeq;
+    if (suggestCtl) suggestCtl.abort();
+    suggestCtl = new AbortController();
+    try {
+      const list = await fetchSuggestions(q, suggestCtl.signal);
+      if (id === suggestSeq) showSuggestions(list);
+    } catch (e) { if (!isAbort(e) && id === suggestSeq) showSuggestions([]); }
+  }, 150);
+}
+
+/* ============ D. VOICE DICTATION ============ */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognizer = null;
+function setStatus(msg) { $("#status").textContent = msg || ""; }
+
+function toggleVoice() {
+  const btn = $("#micBtn");
+  if (!SR) return setStatus("Voice dictation isn’t supported in this browser.");
+  if (!window.isSecureContext) return setStatus("Voice dictation needs a secure (HTTPS) page.");
+  if (recognizer) { recognizer.stop(); return; }
+  recognizer = new SR();
+  recognizer.lang = navigator.language || "en-US";
+  recognizer.interimResults = true;
+  recognizer.onstart = () => { btn.classList.add("listening"); setStatus("Listening…"); };
+  recognizer.onresult = (e) => {
+    $("#q").value = Array.from(e.results).map((r) => r[0].transcript).join("");
+    onInput();
+  };
+  recognizer.onerror = (e) => {
+    const msgs = {
+      "not-allowed": "Microphone access was blocked. Allow it in your browser settings to dictate.",
+      "service-not-allowed": "Microphone access was blocked. Allow it in your browser settings to dictate.",
+      "no-speech": "No speech detected. Try again.",
+      "audio-capture": "No microphone found.",
+      "network": "Voice service unavailable. Check your connection."
+    };
+    setStatus(msgs[e.error] || "Voice dictation failed. Try again.");
+  };
+  recognizer.onend = () => {
+    btn.classList.remove("listening");
+    if ($("#status").textContent === "Listening…") setStatus("");
+    recognizer = null;
+  };
+  try { recognizer.start(); } catch { recognizer = null; setStatus("Couldn’t start voice dictation."); }
+}
+
+/* ============ E. LAYOUT SWITCH ============ */
+function showResultsLayout() {
+  if (document.body.classList.contains("results")) return;
+  document.body.classList.replace("home", "results");
+  $("#headerSlot").append($("#searchWrap"));
+}
+
+/* ============ F. INSTANT ANSWER (left column) ============ */
+const IA_URL = "https://api.duckduckgo.com/?format=json&no_html=1&skip_disambig=1&t=search&q=";
+
+function summarySkeleton() {
+  $("#summary").replaceChildren(
+    el("div", { className: "skeleton line-skel", style: "width:45%;height:24px" }),
+    el("div", { className: "skeleton line-skel" }),
+    el("div", { className: "skeleton line-skel" }),
+    el("div", { className: "skeleton line-skel", style: "width:70%" })
+  );
+}
+function renderSummary(d) {
+  const box = $("#summary");
+  const str = (v) => (typeof v === "string" && v.trim() ? v.trim() : "");
+  const heading = str(d.Heading), abs = str(d.AbstractText), answer = str(d.Answer), def = str(d.Definition);
+  const nodes = [];
+  if (heading) nodes.push(el("h2", { textContent: heading }));
+  const img = str(d.Image);
+  if (img) {
+    const pic = el("img", { className: "thumb", alt: heading || "", loading: "lazy" });
+    pic.onerror = () => pic.remove();
+    pic.src = img.startsWith("/") ? "https://duckduckgo.com" + img : img;
+    nodes.push(pic);
+  }
+  if (answer) nodes.push(el("p", { textContent: answer }));
+  if (abs) nodes.push(el("p", { textContent: abs }));
+  if (def) nodes.push(el("p", { textContent: def }));
+  const links = [];
+  const link = (label, url) => { if (str(url)) links.push(el("a", { href: url, target: "_blank", rel: "noopener noreferrer", textContent: label })); };
+  if (abs) link(str(d.AbstractSource) || "Source", d.AbstractURL);
+  if (def) link(str(d.DefinitionSource) || "Definition source", d.DefinitionURL);
+  if (links.length) {
+    const p = el("p", { className: "src" }, "Source: ");
+    links.forEach((a, i) => { if (i) p.append(", "); p.append(a); });
+    nodes.push(p);
+  }
+  if (!abs && !answer && !def) {
+    box.replaceChildren(el("p", { className: "muted", textContent: "No instant-answer summary is available for this search." }));
+    return;
+  }
+  box.replaceChildren(...nodes);
+}
+async function loadSummary(query, id, signal) {
+  summarySkeleton();
+  try {
+    const res = await fetch(IA_URL + encodeURIComponent(query), { signal });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if (id === searchId) renderSummary(data);
+  } catch (e) {
+    if (isAbort(e) || id !== searchId) return;
+    $("#summary").replaceChildren(el("p", { className: "muted", textContent: "The instant-answer service couldn’t be reached. Try searching again." }));
+  }
+}
+
+/* ============ G. GENERATED IMAGE (right column) ============ */
+function loadImage(query, id) {
+  const box = $("#imageBox");
+  box.replaceChildren(el("div", { className: "ph skeleton", textContent: "Generating image…" }));
+  const img = new Image();
+  img.alt = "Generated image for: " + query;
+  img.onload = () => { if (id === searchId) box.replaceChildren(img); };
+  img.onerror = () => {
+    if (id !== searchId) return;
+    box.replaceChildren(el("div", { className: "ph", style: "background:var(--surface-2)", textContent: "The image couldn’t be generated right now. Try searching again." }));
+  };
+  img.src = "https://image.pollinations.ai/prompt/" + encodeURIComponent(query);
+}
+
+/* ============ H. RELATED SEARCHES ============ */
+async function loadRelated(query, id, signal) {
+  const section = $("#related");
+  section.hidden = true;
+  try {
+    const list = (await fetchSuggestions(query, signal)).filter((s) => s.trim().toLowerCase() !== query.toLowerCase());
+    if (id !== searchId || !list.length) return;
+    $("#relatedList").replaceChildren(...list.map((s) => {
+      const b = el("button", { type: "button", textContent: s, title: s });
+      b.addEventListener("click", () => submitQuery(s));
+      return el("li", {}, b);
+    }));
+    section.hidden = false;
+  } catch (e) { /* hide section on failure */ }
+}
+
+/* ============ I. SEARCH FLOW ============ */
+let searchId = 0, searchCtl = null;
+
+function submitQuery(raw) {
+  const query = (raw || "").replace(/\s+/g, " ").trim();
+  if (!query) return;
+  clearTimeout(suggestTimer);
+  hideSuggestions();
+  if (recognizer) recognizer.stop();
+  setStatus("");
+  $("#q").value = query;
+  $("#q").blur();
+  showResultsLayout();
+  window.scrollTo(0, 0);
+
+  const id = ++searchId;
+  if (searchCtl) searchCtl.abort();
+  searchCtl = new AbortController();
+  loadSummary(query, id, searchCtl.signal);
+  loadImage(query, id);
+  loadRelated(query, id, searchCtl.signal);
+}
+
+/* ============ J. INIT ============ */
+initTheme();
+$("#searchForm").addEventListener("submit", (e) => { e.preventDefault(); submitQuery($("#q").value); });
+$("#q").addEventListener("input", onInput);
+$("#q").addEventListener("keydown", (e) => { if (e.key === "Escape") hideSuggestions(); });
+$("#micBtn").addEventListener("click", toggleVoice);
+if (!SR) $("#micBtn").title = "Voice dictation isn’t supported in this browser";
+document.addEventListener("click", (e) => { if (!$("#searchWrap").contains(e.target)) hideSuggestions(); });
+</script>
+</body>
+</html>
